@@ -4,25 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>EnvVR</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-locomotion@0.2.0/dist/aframe-locomotion.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/a-super-sky@1.1.1/super-sky.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.loaders.min.js"></script>
-    <script
-        src="https://unpkg.com/@c-frame/aframe-physics-system@4.2.3/dist/aframe-physics-system.min.js"></script>
+    <script src="https://unpkg.com/@c-frame/aframe-physics-system@4.2.3/dist/aframe-physics-system.min.js"></script>
+    <link rel="icon" href="Images/Icon.ico" type="image/x-icon">
 </head>
 
 <body>
     <a-scene nav-mesh-strategy id="scene" xr-mode-ui="enterAREnabled: false"
         fog="type: exponential; color: #85aac7; far: 346.667; near: 0; density: 0.02">
-        <a-entity id="nav" position="0 21.44262 -27.325" gltf-model="navmesh.glb" nav-mesh animation-mixer></a-entity>
+        <a-entity id="nav" position="0 21.44262 -27.325" gltf-model="Models/navmesh.glb" nav-mesh
+            animation-mixer></a-entity>
         <!-- Camera rig -->
         <a-entity id="rig" gravity>
             <a-camera id="camera" camera="fov: 90; zoom: 1" nav-mesh-constrained="offset: 0 1.6 0">
                 <a-text id="subtitles" value="hi" position="0.06211 -1 -1.20656"
                     text="align: center; anchor: center; side: double; value: subtitles; width: 1.52;"></a-text>
-            </a-camera>
+                <a-cursor id="cursor" visible="true" color="white" position="0 0 -1" fuse="true" opacity="0.5"
+                    animation__fuse="property: scale; to: 1.5 1.5 1.5; dur: 2000; startEvents: cursor-fusing" /></a-camera>
 
             <!-- Hands -->
             <a-entity laser-controls="hand: left" smooth-locomotion="target: #rig; reference: #camera"
@@ -36,41 +38,15 @@
         <a-super-sky orbitduration='1000000000000000000000' targetfpd="0" startpercent="0.1"
             groundcolor="#000000"></a-super-sky>
 
-        <a-box id="box" class="interactable" material="color: #ffffff" position="0 1.527 -2.461" color="red"></a-box>
+        <a-box id="box" scale="3.46346 4.33156 1" class="interactable" material="color: #ffffff"
+            position="0 -0.44 -2.461"></a-box>
 
-        <a-entity id="tree" gltf-model="tree.glb" animation-mixer="clip: Idle;">
+        <a-entity id="tree" position="-3.048 -1.171 0" gltf-model="Models/tree.glb" animation-mixer="clip: Idle;">
         </a-entity>
 
         <a-light id="light" light="color: #ffd35c" position="0 2.53431 -3.05091"></a-light>
     </a-scene>
-
-    <script>
-        const scene = document.querySelector('a-scene');
-        const text = document.getElementById('subtitles');
-        const box = document.getElementById('box');
-
-        scene.addEventListener('enter-vr', () => {
-            // Move text or change visibility in VR
-            text.setAttribute('position', "0.06211 -0.4 -2"); // lower and closer in VR
-        });
-
-        scene.addEventListener('exit-vr', () => {
-            // Reset or change for non-VR mode
-            text.setAttribute('position', '0.06211 -1 -1.20656'); // original position
-        });
-
-        box.addEventListener('click', () => {
-            box.setAttribute('color', '#FF0000');
-        });
-
-        box.addEventListener('mouseenter', () => {
-            box.setAttribute('color', '#00FF00');
-        });
-
-        box.addEventListener('mouseleave', () => {
-            box.setAttribute('color', '#0000FF');
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
