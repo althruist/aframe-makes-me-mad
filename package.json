@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "aframe-watcher": "^1.4.0",
+    "openssl": "^2.0.0"
+  }
+}
