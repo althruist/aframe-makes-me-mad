@@ -18,33 +18,40 @@
         fog="type: exponential; color: #85aac7; far: 346.667; near: 0; density: 0.02">
         <a-entity id="nav" position="0 21.44262 -27.325" gltf-model="Models/navmesh.glb" nav-mesh
             animation-mixer></a-entity>
+        <a-super-sky orbitduration='1000000000000000000000' targetfpd="0" startpercent="0.1"
+            groundcolor="#000000"></a-super-sky>
+
+        <a-box id="box" scale="3.463 4.332 1" class="interactable" color="magenta"
+            position="-3.57684 -0.44 -2.461"></a-box>
+
+        <a-entity id="tree" position="-3.048 -1.171 0" gltf-model="Models/tree.glb"
+            animation-mixer="clip: Idle;"></a-entity>
+
+        <a-light id="light" light="color: #ffd35c" position="0 2.53431 -3.05091"></a-light>
+
         <!-- Camera rig -->
         <a-entity id="rig" gravity>
             <a-camera id="camera" camera="fov: 90; zoom: 1" nav-mesh-constrained="offset: 0 1.6 0">
                 <a-text id="subtitles" value="hi" position="0.06211 -1 -1.20656"
                     text="align: center; anchor: center; side: double; value: subtitles; width: 1.52;"></a-text>
-                <a-cursor id="cursor" visible="true" color="white" position="0 0 -1" fuse="true" opacity="0.5"
-                    animation__fuse="property: scale; to: 1.5 1.5 1.5; dur: 2000; startEvents: cursor-fusing" /></a-camera>
+                <a-cursor id="cursor" visible="true" color="white" position="0 0 -1" fuse="false" opacity="0.5"
+                    raycaster="objects: .interactable; far: 2"
+                    animation__hover="property: scale; to: 2 2 2; dur:500; easing: easeOutCubic; startEvents: mouseenter;"
+                    animation__hover1="property: opacity; to: 1; dur:250; easing: easeOutCubic; startEvents: mouseenter;"
+                    animation__leave="property: scale; to: 1 1 1; dur:500; easing: easeOutCubic; startEvents: mouseleave;"
+                    animation__leave1="property: opacity; to: 0.5; dur:500; easing: easeOutCubic; startEvents: mouseleave;"
+                    animation__click="property: scale; to: 0.5 0.5 0.5; dur:250; easing: easeOutCubic; startEvents: click;"
+                    animation__reset="property: scale; to: 1 1 1; dur: 250; easing: easeOutCubic; startEvents: reset;" />
+            </a-camera>
 
             <!-- Hands -->
-            <a-entity laser-controls="hand: left" smooth-locomotion="target: #rig; reference: #camera"
-                raycaster="objects: .interactable; far: 10000">
+            <a-entity id='left-hand' laser-controls="hand: left" smooth-locomotion="target: #rig; reference: #camera"
+                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1;">
             </a-entity>
-            <a-entity laser-controls="hand: right" smooth-turn="target: #rig; reference: #camera; turnSpeed: 180"
-                raycaster="objects: .interactable; far: 10000">
+            <a-entity id='right-hand' laser-controls="hand: right" smooth-turn="target: #rig; reference: #camera; turnSpeed: 180"
+                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1;">
             </a-entity>
         </a-entity>
-
-        <a-super-sky orbitduration='1000000000000000000000' targetfpd="0" startpercent="0.1"
-            groundcolor="#000000"></a-super-sky>
-
-        <a-box id="box" scale="3.46346 4.33156 1" class="interactable" material="color: #ffffff"
-            position="0 -0.44 -2.461"></a-box>
-
-        <a-entity id="tree" position="-3.048 -1.171 0" gltf-model="Models/tree.glb" animation-mixer="clip: Idle;">
-        </a-entity>
-
-        <a-light id="light" light="color: #ffd35c" position="0 2.53431 -3.05091"></a-light>
     </a-scene>
     <script src="script.js"></script>
 </body>
