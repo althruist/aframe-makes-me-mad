@@ -2,38 +2,70 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta content="WebVR" property="og:title" />
+    <meta content="A VR college project for 'Project' class made by althruist." property="og:description" />
+    <meta content="https://althruist.fyi" property="og:url" />
+    <meta content="https://raw.githubusercontent.com/althruist/EnvVR/refs/heads/main/Images/Screenshots/EmbedImage.png" property="og:image" />
+    <meta content="#ffcea8" data-react-helmet="true" name="theme-color" />
+    <meta name="twitter:card" content="summary_large_image">
     <title>EnvVR</title>
+
+    <!-- A-Frame Core + Plugins -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-locomotion@0.2.0/dist/aframe-locomotion.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/a-super-sky@1.1.1/super-sky.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.loaders.min.js"></script>
-    <script src="https://unpkg.com/@c-frame/aframe-physics-system@4.2.3/dist/aframe-physics-system.min.js"></script>
-    <link rel="icon" href="Images/Icon.ico" type="image/x-icon">
+    <link rel="icon" href="Images/Icon.ico" type="image/x-icon" />
 </head>
 
 <body>
-    <a-scene nav-mesh-strategy id="scene" xr-mode-ui="enterAREnabled: false"
-        fog="type: exponential; color: #85aac7; far: 346.667; near: 0; density: 0.02">
-        <a-entity id="nav" position="0 21.44262 -27.325" gltf-model="Models/navmesh.glb" nav-mesh
+    <a-scene id="scene" nav-mesh-strategy xr-mode-ui="enterAREnabled: false"
+        fog="type: exponential; color: #85aac7; far: 346.667; near: 0; density: 0;">
+
+        <a-assets timeout="10000">
+            <!-- Audio -->
+            <audio id="hover-sfx" src="Sound/SFX/Cursor/Hover.wav"></audio>
+            <audio id="click-sfx" src="Sound/SFX/Cursor/Click.wav"></audio>
+            <audio id="block-sfx" src="Sound/SFX/Cursor/Block.wav"></audio>
+
+            <!-- Images -->
+            <a-image id='#menu-sky' src="Images/MenuSky.png"></a-image>
+
+            <!-- Models -->
+            <a-asset-item id="navmesh-model" src="Models/navmesh.glb"></a-asset-item>
+            <a-asset-item id="tree-model" src="Models/tree.glb"></a-asset-item>
+        </a-assets>
+
+        <!-- Scene Objects -->
+        <a-entity id="nav" position="0 21.44262 -27.325" gltf-model="#navmesh-model" nav-mesh
             animation-mixer></a-entity>
-        <a-super-sky orbitduration='1000000000000000000000' targetfpd="0" startpercent="0.1"
+
+        <a-super-sky id="envSky" orbitduration="1000000000000000000000" targetfpd="0" startpercent="0.1"
             groundcolor="#000000"></a-super-sky>
 
-        <a-box id="box" scale="3.463 4.332 1" class="interactable" color="magenta"
-            position="-3.57684 -0.44 -2.461"></a-box>
+        <a-super-sky id="menuSky" position="2010 0 0" orbitduration="1000000000000000000000" targetfpd="0"
+            startpercent="-0.1" groundcolor="#000000"></a-super-sky>
 
-        <a-entity id="tree" position="-3.048 -1.171 0" gltf-model="Models/tree.glb"
+        <a-sky src='Images/MenuSky.png' position='2010 0 0'></a-sky>
+
+        <a-box id="box" scale="3.463 4.332 1" class="interactable" color="magenta" data-logic="box"
+            position="-3.577 -0.44 -2.461"></a-box>
+
+        <a-entity id="tree" position="-3.048 -1.171 0" gltf-model="#tree-model"
             animation-mixer="clip: Idle;"></a-entity>
 
         <a-light id="light" light="color: #ffd35c" position="0 2.53431 -3.05091"></a-light>
 
-        <!-- Camera rig -->
+        <!-- Camera Rig -->
         <a-entity id="rig" gravity>
             <a-camera id="camera" camera="fov: 90; zoom: 1" nav-mesh-constrained="offset: 0 1.6 0">
                 <a-text id="subtitles" value="hi" position="0.06211 -1 -1.20656"
-                    text="align: center; anchor: center; side: double; value: subtitles; width: 1.52;"></a-text>
+                    text="align: center; anchor: center; value: ; width: 1.52; opacity: 0;"
+                    animation__show="property: opacity; to: 1; dur: 500; easing: easeOutSine; startEvents: show;"
+                    animation__hide="property: opacity; to: 0; dur: 500; easing: easeOutSine; startEvents: hide;"></a-text>
+
                 <a-cursor id="cursor" visible="true" color="white" position="0 0 -1" fuse="false" opacity="0.5"
                     raycaster="objects: .interactable; far: 2"
                     animation__hover="property: scale; to: 2 2 2; dur:500; easing: easeOutCubic; startEvents: mouseenter;"
@@ -41,19 +73,24 @@
                     animation__leave="property: scale; to: 1 1 1; dur:500; easing: easeOutCubic; startEvents: mouseleave;"
                     animation__leave1="property: opacity; to: 0.5; dur:500; easing: easeOutCubic; startEvents: mouseleave;"
                     animation__click="property: scale; to: 0.5 0.5 0.5; dur:250; easing: easeOutCubic; startEvents: click;"
-                    animation__reset="property: scale; to: 1 1 1; dur: 250; easing: easeOutCubic; startEvents: reset;" />
+                    animation__reset="property: scale; to: 1 1 1; dur: 250; easing: easeOutCubic; startEvents: reset;">
+                </a-cursor>
+
+                <a-entity id="sfxPlayer" sound="volume: 1;"></a-entity>
+                <a-entity id="voicePlayer" sound="volume: 1;" position='0 0 -5'></a-entity>
             </a-camera>
 
             <!-- Hands -->
-            <a-entity id='left-hand' laser-controls="hand: left" smooth-locomotion="target: #rig; reference: #camera"
-                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1;">
-            </a-entity>
-            <a-entity id='right-hand' laser-controls="hand: right" smooth-turn="target: #rig; reference: #camera; turnSpeed: 180"
-                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1;">
-            </a-entity>
+            <a-entity id="left-hand" laser-controls="hand: left" smooth-locomotion="target: #rig; reference: #camera"
+                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1;"></a-entity>
+
+            <a-entity id="right-hand" laser-controls="hand: right"
+                smooth-turn="target: #rig; reference: #camera; turnSpeed: 180"
+                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1;"></a-entity>
         </a-entity>
     </a-scene>
-    <script src="script.js"></script>
+
+    <script type="module" src="Scripts/main.js"></script>
 </body>
 
 </html>
