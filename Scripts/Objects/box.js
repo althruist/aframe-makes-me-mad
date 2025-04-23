@@ -1,4 +1,4 @@
-import { setSubtitle, subtitleVisibility } from '../Utils/subtitles.js';
+import { setSubtitle } from '../Utils/subtitles.js';
 import { say } from '../Utils/voicelines.js';
 
 const tree = document.getElementById("tree");

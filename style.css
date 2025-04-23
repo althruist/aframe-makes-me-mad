@@ -1,0 +1,31 @@
+#startScreen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    background: rgb(0, 0, 0);
+}
+
+#startButton {
+    background-color: transparent;
+    color: white;
+    border: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+#startText {
+    font-size: 50px;
+}
+
+#startButton #startText {
+    transition: transform 0.2s ease;
+    transform: scale(1);
+}
+
+#startButton:hover #startText {
+    transition: transform 0.2s ease;
+    transform: scale(0.9);
+}

@@ -1,4 +1,7 @@
+import { transition } from './Utils/transitionScreen.js';
+
 const cursor = document.getElementById('cursor');
+const startButton = document.getElementById('startButton');
 const sfxPlayer = document.getElementById('sfxPlayer');
 
 // Gameplay Elements
@@ -17,6 +20,12 @@ const blockSound = '#block-sfx';
 
 //Runtime Stuff
 let clickDebounce = false;
+// let leftTriggerDown = false;
+
+AFRAME.registerComponent('disabled', {
+    schema: { type: 'boolean', default: false }
+});
+
 
 const playSound = (soundID) => {
     sfxPlayer.setAttribute('sound', 'autoplay', false);
@@ -39,7 +48,8 @@ scene.addEventListener('exit-vr', () => {
 
 interactables.forEach(object => {
     object.addEventListener('click', async (e) => {
-        if (e.detail && !cursor.getAttribute('raycaster').enabled) {
+        console.log("clicked");
+        if (object.getAttribute('disabled') || (e.detail && e.detail.cursorEl == rightHand && !cursor.getAttribute('raycaster').enabled)) {
             playSound(blockSound);
             return;
         } else {
@@ -58,15 +68,16 @@ interactables.forEach(object => {
             }
 
             playSound(clickSound);
+            if (object.getAttribute('clickonce')) {
+                object.classList.toggle('interactable');
+            }
 
             setTimeout(() => {
                 clickDebounce = false;
             }, 300);
         }
     })
-});
 
-interactables.forEach(object => {
     object.setAttribute('animation__hover', {
         property: 'material.emissiveIntensity',
         to: 1,
@@ -87,14 +98,11 @@ interactables.forEach(object => {
         startEvents: 'leave, click'
     });
 
-    const originalColour = object.getAttribute('color');
-
-    object.setAttribute('material', 'emissive', originalColour);
     object.setAttribute('material', 'emissiveIntensity', 0);
 
     object.addEventListener('mouseenter', (e) => {
-        if (e.detail.cursorEl == rightHand) {
-            rightHand.setAttribute('raycaster', 'lineColor', '#FF0000');
+        if (object.getAttribute('disabled') || e.detail.cursorEl == rightHand) {
+            e.detail.cursorEl.setAttribute('raycaster', 'lineColor', '#FF0000');
             return;
         } else {
             object.emit('enter');
@@ -104,8 +112,8 @@ interactables.forEach(object => {
 
     object.addEventListener('mouseleave', (e) => {
         if (clickDebounce) return;
-        if (e.detail.cursorEl == rightHand) {
-            rightHand.setAttribute('raycaster', 'lineColor', '#e5f5a9');
+        if (object.getAttribute('disabled') || e.detail.cursorEl == rightHand) {
+            e.detail.cursorEl.setAttribute('raycaster', 'lineColor', '#e5f5a9');
         } else {
             object.emit('leave');
         };
@@ -113,15 +121,24 @@ interactables.forEach(object => {
 });
 
 cursor.addEventListener('animationcomplete__click', function () {
-    const clickedObj = cursor.components.raycaster.intersectedEls[0];
     cursor.emit("reset");
-    clickedObj.classList.toggle('interactable');
 });
 
-leftHand.addEventListener('triggerdown', function () {
-    const clickedObj = leftHand.components.raycaster.intersectedEls[0];
-    if (clickedObj && clickedObj.classList) {
-        clickedObj.classList.toggle('interactable');
-        clickedObj.emit("click");
-    }
+// leftHand.addEventListener('triggerdown', function () {
+//     if (leftTriggerDown) return;
+//     leftTriggerDown = true;
+
+//     const clickedObj = leftHand.components.raycaster.intersectedEls[0];
+//     if (clickedObj && clickedObj.classList) {
+//         if (clickedObj.getAttribute('clickonce')) {
+//             clickedObj.classList.toggle('interactable');
+//         }
+//         clickedObj.emit("click");
+//     }
+// });
+
+startButton.addEventListener('click', function () {
+    startButton.removeEventListener("click", startButton);
+    setTimeout(() => transition(),
+        3000);
 });
