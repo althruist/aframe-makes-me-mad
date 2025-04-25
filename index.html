@@ -17,10 +17,11 @@
     <!-- A-Frame Core + Plugins -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-locomotion@0.2.0/dist/aframe-locomotion.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/a-super-sky@1.1.1/super-sky.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.loaders.min.js"></script>
     <script defer
         src="https://cdn.jsdelivr.net/gh/c-frame/aframe-gltf-model-plus@1.2.0/dist/gltf-model-plus.min.js"></script>
+    <script src="https://unpkg.com/aframe-haptics-component/dist/aframe-haptics-component.min.js"></script>
+
     <link rel="icon" href="Images/Icon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="style.css">
 </head>
@@ -38,24 +39,30 @@
     </div>
 
     <a-scene id="scene" nav-mesh-strategy xr-mode-ui="enterAREnabled: false"
-        environment-settings="envMapTexture: Images/Skies/MenuSky/MenuSky_Blurred.jpg"
-        fog="type: exponential; color: #85aac7; far: 400.667; near: 0; density: 0;">
+        environment-settings="envMapTexture: Images/Skies/MenuSky/MenuSky_Blurred.jpg; toneMappingExposure: 1"
+        fog="type: exponential; color: #dbc0bf; far: 400.667; near: 0; density: 0.03;">
 
         <a-assets timeout="10000">
-            <!-- Audio -->
-            <audio id="hover-sfx" src="Sound/SFX/Cursor/Hover.wav"></audio>
-            <audio id="click-sfx" src="Sound/SFX/Cursor/Click.wav"></audio>
-            <audio id="block-sfx" src="Sound/SFX/Cursor/Block.wav"></audio>
-
-            <!-- Images -->
-            <a-image id='#menu-sky' src="Images/Skies/MenuSky/MenuSky.png"></a-image>
-
             <!-- Models -->
-            <a-asset-item id="navmesh-model" src="Models/navmesh.glb"></a-asset-item>
+            <a-asset-item id="forestnavmesh-model" src="Models/forest_navmesh.glb"></a-asset-item>
+            <a-asset-item id="forestterrain-model" src="Models/forest_terrain.glb"></a-asset-item>
+
             <a-asset-item id="spacenav-model" src="Models/spacenav.glb"></a-asset-item>
             <a-asset-item id="tree-model" src="Models/tree.glb"></a-asset-item>
             <a-asset-item id="panel-model" src="Models/panel.glb"></a-asset-item>
 
+            <!-- Sound -->
+            <audio id="footsteps-sfx" src="Sound/SFX/Footsteps.wav" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="loading-sfx" src="Sound/SFX/Loading.wav" preload="auto" crossorigin="anonymous"></audio>
+
+            <audio id="hover-sfx" src="Sound/SFX/Cursor/Hover.wav" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="click-sfx" src="Sound/SFX/Cursor/Click.wav" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="block-sfx" src="Sound/SFX/Cursor/Block.wav" preload="auto" crossorigin="anonymous"></audio>
+
+            <audio id="space-song" src="Sound/Music/space.wav" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="forest-song" src="Sound/Music/forest.wav" preload="auto" crossorigin="anonymous"></audio>
+
+            <!-- Cubemaps -->
             <a-cubemap id="test-cubemap">
                 <img src="Images/TemporaryCubemap/image.jpg"></img>
                 <img src="Images/TemporaryCubemap/image.jpg"></img>
@@ -76,47 +83,63 @@
         </a-assets>
 
         <!-- Scene Objects -->
+
+        <!-- Forest Scene  -->
+        <a-entity id="forestnav" position="0 7.21188 -27" gltf-model="#forestnavmesh-model" nav-mesh
+            visible='false'></a-entity>
+
+        <a-entity id="forestterrain" shadow="cast: false" position="0 7.16359 -27" gltf-model="#forestterrain-model"
+            shadow="receive: true;"></a-entity>
+
+        <a-sky id="forestsky" src='Images/Skies/ForestSky.png' material='fog: false;' position='0 0 0'></a-sky>
+
+        <a-entity id="sun" position="-250 19.64455 0.96545" geometry="primitive: cylinder"
+            material="emissive: #ffd9ad; fog: false" rotation="0 0 90" scale="2 1 2">
+            <a-light id="light-sun"
+                light="distance: 1000; decay: -0.17; angle: 112.95; castShadow: true; intensity: 1; color: #ff8566; type: spot; penumbra: 1; shadowCameraVisible: false; shadowBias: 0; shadowCameraBottom: 0; shadowCameraFar: 6.51; shadowRadius: 0.63; shadowCameraFov: 90; shadowCameraNear: 3.08"
+                rotation="-90 0 0"></a-light>
+        </a-entity>
+
+        <a-entity id="tree" position="-5.30762 -1.0996 -0.47516" gltf-model="#tree-model" animation-mixer="clip: Idle;"
+            shadow="cast: true;"></a-entity>
+
+        <a-light id="light-ambient" light="color: #384c7a; type: ambient; intensity: 1.37"
+            position="-1.94109 6.09543 -2.08689"></a-light>
+
+        <!-- Menu Scene -->
+        <a-sky id="menusky" src='Images/Skies/MenuSky/MenuSky.png' material='fog: false; ' position='2010 0 0'></a-sky>
+
         <a-entity id="nav" position="2000 6.449 -27.325" scale='0.1 0.1 0.1' gltf-model="#spacenav-model"
             visible="false" nav-mesh animation-mixer></a-entity>
-        <a-entity id="nav" position="0 6.44933 -27" gltf-model="#navmesh-model" nav-mesh animation-mixer></a-entity>
 
-        <a-super-sky id="envSky" material="sunPosition: [object Object]" orbitduration="1000000000000000000000"
-            targetfpd="0" startpercent="0.1" groundcolor="#000000"></a-super-sky>
-
-        <a-super-sky id="menuSky" material="sunPosition: [object Object]" position="2010 0 0"
-            orbitduration="1000000000000000000000" targetfpd="0" startpercent="-0.1"
-            groundcolor="#000000"></a-super-sky>
-
-        <a-sky src='Images/Skies/MenuSky/MenuSky.png' position='2010 0 0'></a-sky>
-        <a-light id="light"
-            light="distance: 0; decay: 1; angle: 59.78; castShadow: false; intensity: 1.6; color: #a9849f; type: point"
-            rotation="29.380702776513484 -13.048540826309369 55.69207064451115"
-            position="-2.06112 0.74112 -2.08689"></a-light>
-
-        <a-box id="box" scale="3.463 4.332 1" class="interactable" color="white" data-logic="box" emissive="magenta" clickonce="true"
-            position="-3.577 -0.44 -2.461"></a-box>
+        <a-box id="box" scale="3.463 0.932 1" class="interactable" color="white" data-logic="box" emissive="magenta"
+            clickonce="true" position="-10.11017 0.27715 6.3753" shadow="cast: true;"></a-box>
 
         <a-entity id="panel" rotation="180 90 0" gltf-model="Models/panel.glb" position="2000.01753 7.848 -30.33968"
             animation__mild="property: position; to: 2000.01753 8 -30.33968; dur: 2000; dir: alternate; easing: easeInOutSine; loop: true;">
-            <a-cylinder id="forest-teleport" class="interactable" data-logic="teleporter" scale="0.5 0.001 0.5" position="-0.02215 0.00384 1.28" rotation="90 90 0" material="envMap: #test-cubemap; roughness: 0; metalness: 1;" emissive="green"></a-cylinder>
-            <a-cylinder id="ocean-teleport" class="interactable" data-logic="teleporter" scale="0.5 0.001 0.5" position="-0.02215 0.00384 -1.4" rotation="90 90 0" material="envMap: #test-cubemap2; roughness: 0; metalness: 1;" emissive="blue"></a-cylinder>
+            <a-cylinder id="forest-teleport" class="interactable" data-logic="teleporter" scale="0.5 0.001 0.5"
+                position="-0.02215 0.00384 1.28" rotation="90 90 0"
+                material="envMap: #test-cubemap; roughness: 0; metalness: 1; fog: false;" emissive="green"></a-cylinder>
+            <a-cylinder id="ocean-teleport" class="interactable" data-logic="teleporter" scale="0.5 0.001 0.5"
+                position="-0.02215 0.00384 -1.4" rotation="90 90 0"
+                material="envMap: #test-cubemap2; roughness: 0; metalness: 1; fog: false;" emissive="blue"></a-cylinder>
         </a-entity>
-
-        <a-entity id="tree" position="-3.048 -1.06793 0" gltf-model="#tree-model"
-            animation-mixer="clip: Idle;"></a-entity>
-
-        <a-light id="light" light="color: #ffd35c" position="0 2.53431 -3.05091"></a-light>
 
         <!-- Camera Rig -->
         <a-entity id="rig" gravity position="2000 6.449 -27.325">
-            <a-camera id="camera" camera="fov: 90; zoom: 1" nav-mesh-constrained="offset: 0 1.6 0">
-                <a-text id="subtitles" value="hi" position="0.06211 -1 -1.20656"
+
+            <a-camera id="camera" camera="fov: 90; zoom: 1" nav-mesh-constrained="offset: 0 1.6 0"
+                wasd-controls="acceleration: 16" walk="false"
+                animation__walk="property: nav-mesh-constrained.offset; to: 0 1.7 0; easing: easeInOutSine; dir: alternate; dur: 250; loop: true; startEvents: walkAnim; pauseEvents: stopAnim; resumeEvents: walkAnim;"
+                animation__stop="property: nav-mesh-constrained.offset; to: 0 1.6 0; dir: alternate; dur: 500; loop: true; easing: easeInOutSine; startEvents: stopAnim; pauseEvents: walkAnim; resumeEvents: stopAnim;">
+
+                <a-text id="subtitles" value="hi" position="0.06211 -1 -1.20656" material='fog: false;'
                     text="align: center; anchor: center; value: ; width: 1.52; opacity: 0;"
                     animation__show="property: opacity; to: 1; dur: 500; easing: easeOutSine; startEvents: show;"
                     animation__hide="property: opacity; to: 0; dur: 500; easing: easeOutSine; startEvents: hide;"></a-text>
 
                 <a-cursor id="cursor" visible="true" color="white" position="0 0 -1" fuse="false" opacity="0.5"
-                    raycaster="objects: .interactable; far: 2.5"
+                    material='fog: false;' raycaster="objects: .interactable; far: 2.5"
                     animation__hover="property: scale; to: 2 2 2; dur:500; easing: easeOutCubic; startEvents: mouseenter;"
                     animation__hover1="property: opacity; to: 1; dur:250; easing: easeOutCubic; startEvents: mouseenter;"
                     animation__leave="property: scale; to: 1 1 1; dur:500; easing: easeOutCubic; startEvents: mouseleave;"
@@ -125,10 +148,17 @@
                     animation__reset="property: scale; to: 1 1 1; dur: 250; easing: easeOutCubic; startEvents: reset;">
                 </a-cursor>
 
-                <a-entity id="sfxPlayer" sound="volume: 1;"></a-entity>
+                <!-- Sound Objects -->
+                <a-entity id="sfxPlayer" sound="volume: 0; positional: false;"></a-entity>
+                <a-entity id="footstepsPlayer"
+                    sound="src: #footsteps-sfx; volume: 0.025; positional: false; loop: true;"></a-entity>
                 <a-entity id="voicePlayer" sound="volume: 1;" position='0 0 -5'></a-entity>
-                <a-video id="loadingVideo" material="opacity: 1; color: #FFFFFF;" width="2"autoplay="true"
-                    loop="true" position="0 0 -0.4" src="#spinning-tree-silhouette"
+                <a-entity id="musicPlayer" sound="volume: 0; loop: true; positional: false;"
+                    animation__fadeout="property: sound.volume; to: 0; dur: 1000; easing: easeOutCubic; startEvents: fadeout"
+                    animation__fadein="property: sound.volume; to: 0.1; dur: 1000; easing: easeOutCubic; startEvents: fadein"></a-entity>
+
+                <a-video id="loadingVideo" material="opacity: 1; color: #FFFFFF;" width="1.67" autoplay="true"
+                    material='fog: false;' loop="true" position="0 0 -0.4" src="#spinning-tree-silhouette"
                     animation__show1="property: opacity; to: 1; dur: 500; easing: easeOutCubic; startEvents: show1;"
                     animation__show2="property: material.color; to: #FFFFFF; dur: 500; easing: easeOutCubic; startEvents: show2;"
                     animation__hide1="property: opacity; to: 0; dur: 500; easing: easeOutCubic; startEvents: hide1;"
@@ -136,32 +166,17 @@
             </a-camera>
 
             <!-- Hands -->
-            <a-entity id="left-hand" laser-controls="hand: left" smooth-locomotion="target: #rig; reference: #camera"
-                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1;"></a-entity>
+            <a-entity id="left-hand" meta-touch-controls="hand: left" thumbstick-logging laser-controls="hand: left"
+                haptics smooth-locomotion="target: #rig; reference: #camera" joystick-listener
+                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1; enabled: true;"></a-entity>
 
-            <a-entity id="right-hand" laser-controls="hand: right"
+            <a-entity id="right-hand" meta-touch-controls="hand: right" laser-controls="hand: right" haptics
                 smooth-turn="target: #rig; reference: #camera; turnSpeed: 180"
-                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1;"></a-entity>
+                raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1; enabled: true;"></a-entity>
         </a-entity>
     </a-scene>
 
     <script type="module" src="Scripts/main.js"></script>
-    <script>
-        const t1 = document.getElementById('forest-teleport');
-        const t2 = document.getElementById('ocean-teleport');
-
-        function helpme(val){
-            if(val){
-                t1.setAttribute('disabled', 'true');
-                t2.setAttribute('disabled', 'true');
-            } else {
-                t1.setAttribute('disabled', 'false');
-                t2.setAttribute('disabled', 'false');
-            }
-            console.log(t1.getAttribute('disabled'));
-            console.log(t2.getAttribute('disabled'));
-        }
-    </script>
 </body>
 
 </html>

@@ -1,8 +1,13 @@
 import { transition } from './Utils/transitionScreen.js';
+import { setSong, fade } from './Utils/music.js';
 
 const cursor = document.getElementById('cursor');
+const camera = document.getElementById('camera');
 const startButton = document.getElementById('startButton');
+
+// Sound Players
 const sfxPlayer = document.getElementById('sfxPlayer');
+const footstepsPlayer = document.getElementById('footstepsPlayer');
 
 // Gameplay Elements
 const scene = document.querySelector('a-scene');
@@ -20,12 +25,47 @@ const blockSound = '#block-sfx';
 
 //Runtime Stuff
 let clickDebounce = false;
-// let leftTriggerDown = false;
+let isWalking = false;
+let canWalk = false;
+
+const haptics = (controller, type) => {
+    if (controller && controller.components && controller.components.haptics) {
+        if (type == "block") {
+            controller.components.haptics.pulse(1, 100);
+            setTimeout(() => {
+                if (controller.components.haptics) {
+                    controller.components.haptics.pulse(1, 100);
+                }
+            }, 200);
+        }
+    }
+};
 
 AFRAME.registerComponent('disabled', {
     schema: { type: 'boolean', default: false }
 });
 
+AFRAME.registerComponent('walk', {
+    schema: { type: 'boolean', default: true },
+
+    update: function (oldData) {
+        if (oldData !== this.data) {
+            if (this.data) {
+                canWalk = true;
+                camera.setAttribute('wasd-controls', 'enabled', true);
+                leftHand.setAttribute('smooth-locomotion', 'target: #rig; reference: #camera');
+                console.log(leftHand.components);
+            } else {
+                canWalk = false;
+                camera.setAttribute('wasd-controls', 'enabled', false);
+                leftHand.removeAttribute('smooth-locomotion');
+                console.log(leftHand.components);
+            }
+        }
+    }
+});
+
+camera.setAttribute('walk', false);
 
 const playSound = (soundID) => {
     sfxPlayer.setAttribute('sound', 'autoplay', false);
@@ -48,9 +88,10 @@ scene.addEventListener('exit-vr', () => {
 
 interactables.forEach(object => {
     object.addEventListener('click', async (e) => {
-        console.log("clicked");
         if (object.getAttribute('disabled') || (e.detail && e.detail.cursorEl == rightHand && !cursor.getAttribute('raycaster').enabled)) {
             playSound(blockSound);
+            haptics(leftHand, "block");
+            haptics(rightHand, "block");
             return;
         } else {
             const logicId = object.getAttribute('data-logic');
@@ -139,6 +180,71 @@ cursor.addEventListener('animationcomplete__click', function () {
 
 startButton.addEventListener('click', function () {
     startButton.removeEventListener("click", startButton);
+    document.title = "EnvVR - Scene Selection";
+    setSong('#space-song');
     setTimeout(() => transition(),
         3000);
+    setTimeout(() => fade('in'),
+        3000);
+});
+
+const keysPressed = new Set();
+const movementKeys = new Set(['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
+
+document.addEventListener('keydown', (event) => {
+    if (!canWalk) {
+        return;
+    }
+    if (movementKeys.has(event.key)) {
+        keysPressed.add(event.key);
+        if (keysPressed.size > 0) {
+            if (isWalking) {
+                return;
+            } else {
+                footstepsPlayer.components.sound.playSound();
+                isWalking = true;
+                camera.emit('walkAnim');
+            }
+        }
+    }
+});
+
+document.addEventListener('keyup', (event) => {
+    if (!canWalk) {
+        return;
+    }
+    if (movementKeys.has(event.key)) {
+        keysPressed.delete(event.key);
+        if (keysPressed.size === 0) {
+            footstepsPlayer.components.sound.stopSound();
+            isWalking = false;
+            camera.emit('stopAnim');
+        }
+    }
+});
+
+AFRAME.registerComponent('thumbstick-logging', {
+    init: function () {
+        this.el.addEventListener('thumbstickmoved', this.logThumbstick);
+    },
+    logThumbstick: function (evt) {
+        if (!canWalk) {
+            return;
+        }
+        const x = evt.detail.x;
+        const y = evt.detail.y;
+        const deadzone = 0.1; // Threshold to consider the thumbstick at rest
+
+        if (Math.abs(x) > deadzone || Math.abs(y) > deadzone) {
+            if (isWalking) {
+                return;
+            } else {
+                footstepsPlayer.components.sound.playSound();
+                isWalking = true;
+            }
+        } else {
+            footstepsPlayer.components.sound.stopSound();
+            isWalking = false;
+        }
+    }
 });
