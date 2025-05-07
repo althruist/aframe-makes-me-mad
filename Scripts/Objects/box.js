@@ -1,9 +1,11 @@
 import { setSubtitle } from '../Utils/subtitles.js';
 import { say } from '../Utils/voicelines.js';
+import { finishObjective } from '../Utils/objectives.js';
 
 const tree = document.getElementById("tree");
 
 export async function handle(object) {
+    finishObjective();
     console.log("Cube logic executed!");
     say('Test', '01');
     say('Test', '02');
