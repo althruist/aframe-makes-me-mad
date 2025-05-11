@@ -1,6 +1,3 @@
-const camera = document.getElementById("camera");
-const rig = document.getElementById("rig");
-
 let animationQueue = [];
 let isAnimating = false;
 
@@ -26,8 +23,9 @@ function enableControls() {
     }
 }
 
-function stop(camPos) {
-    rig.setAttribute('position', camPos);
+function stop(camPosition) {
+    rig.setAttribute('rotation', "0 0 0");
+    rig.setAttribute('position', camPosition);
     enableControls();
     rig.removeAttribute('animation');
     animationQueue = [];
@@ -35,13 +33,13 @@ function stop(camPos) {
 }
 
 export function viewport(action, options = {}) {
-    const { property, from, to, dur, easing, autoStop = false, camPos } = options;
+    const { property, from, to, dur, easing, autoStop = false, camPosition, camRotation } = options;
 
     if (action === "animate") {
-        animationQueue.push({ property, from, to, dur, easing, autoStop, camPos });
+        animationQueue.push({ property, from, to, dur, easing, autoStop, camPosition, camRotation });
         processQueue();
     } else if (action === "stop") {
-        stop(camPos);
+        stop(camPosition);
     }
 }
 
@@ -49,10 +47,11 @@ function processQueue() {
     if (isAnimating || animationQueue.length === 0) return;
 
     isAnimating = true;
-    const { property, from, to, dur, easing, autoStop, camPos } = animationQueue.shift();
+    const { property, from, to, dur, easing, autoStop, camPosition, camRotation } = animationQueue.shift();
 
     disableControls();
-
+    camera.setAttribute('rotation', '0 0 0');
+    rig.setAttribute('rotation', camRotation);
     rig.setAttribute('animation', {
         property,
         from,
@@ -66,7 +65,7 @@ function processQueue() {
         isAnimating = false;
 
         if (autoStop && animationQueue.length === 0) {
-            stop(camPos);
+            stop(camPosition);
         } else {
             processQueue();
         }

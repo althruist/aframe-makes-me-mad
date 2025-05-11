@@ -1,4 +1,4 @@
-const voicelinesPlayer = document.getElementById('voicePlayer');
+const voicelinesPlayer = document.getElementById('voice-player');
 
 let queue = [];
 let isPlaying = false;

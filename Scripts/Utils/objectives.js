@@ -26,7 +26,7 @@ export async function setObjective(text) {
     vrObjective.emit("show");
     objective.setAttribute('text', 'value', `Objective: ${text}`);
     vrObjective.setAttribute('text', 'value', `Objective: ${text}`);
-    playSound(newObjectiveSound);
+    playSound(newObjectiveSound, "objectivesPlayer");
     setTimeout(() => {
         objective.emit("hide");
         vrObjective.emit("hide");
@@ -44,7 +44,7 @@ document.addEventListener('keydown', (event) => {
             return;
         }
         debounce = true;
-        playSound(newObjectiveSound);
+        playSound(newObjectiveSound, "objectivesPlayer");
         objective.emit("show");
     }
 });
@@ -74,7 +74,7 @@ export function finishObjective() {
         vrObjective.emit("show");
         objective.setAttribute('text', 'color', '#00FF00');
         vrObjective.setAttribute('text', 'color', '#00FF00');
-        playSound(objectiveClearedSound);
+        playSound(objectiveClearedSound, "objectivesPlayer");
 
         setTimeout(() => {
             objective.emit("hide");
@@ -101,6 +101,7 @@ export function objectiveVR(action) {
         if (action == true) {
             haptics(leftHand, "newObjective");
             vrObjective.emit("show");
+            playSound(newObjectiveSound, "objectivesPlayer");
         } else {
             vrObjective.emit("hide");
         }
