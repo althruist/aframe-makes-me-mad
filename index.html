@@ -175,8 +175,8 @@
         </a-entity>
 
         <a-entity id="bird" class="interactable informative animal" rotation="-8.9 92.62 -16.15"
-            position="-16.6742 5.51694 34.17358" gltf-model="#bird-model"
-            animation-mixer="useRegExp:true; clip:Idle;" data-logic="bird" sound></a-entity>
+            position="-16.6742 5.51694 34.17358" gltf-model="#bird-model" animation-mixer="useRegExp:true; clip:Idle;"
+            data-logic="bird" sound></a-entity>
 
         <a-ocean id="ocean" ocean="depth: 800; density: 150" position="247.52758 1.48827 88.95824" width="500"
             depth="500" color="#83C4EC" density="100"
@@ -382,7 +382,7 @@
         <a-box id="box1" scale="0.27 0.3 0.23" class="interactable" color="blue" data-logic="treeForestScene"
             emissive="red" position="4.30312 5.27547 -68.08476" clickonce="true"></a-box>
 
-        <a-entity id="panel" rotation="180 90 0" gltf-model="Models/panel.glb" position="2000.018 7.956 -30.34"
+        <a-entity id="panel" rotation="180 90 0" gltf-model="Models/Panel.glb" position="2000.018 7.956 -30.34"
             animation__mild="property: position; to: 2000.01753 8 -30.33968; dur: 2000; dir: alternate; easing: easeInOutSine; loop: true;">
             <a-cylinder id="forest-teleport" class="interactable" data-logic="teleporter" scale="0.5 0.001 0.5"
                 position="-0.02215 0.00384 1.28" rotation="90 90 0"
@@ -404,8 +404,8 @@
 
         <a-entity id="ocean-terrain" position="-2000 0 0" gltf-model="#oceanterrain-model"></a-entity>
 
-        <a-entity light="color: #42e0ff; decay: 0.67; distance: 10000; intensity: 100; type: spot"
-            position="-1989.5491 9.22231 162.28635"></a-entity>
+        <a-entity id="ocean-light" light="angle: 180; color: #3d7eff; decay: 0.67; distance: 10004.99; intensity: 500; type: spot"
+            position="-1990.1191 315.18808 224.98035" animation="property: position; to: -1900 315 200; easing: easeInOutSine; dur: 5000; dir: alternate; loop: true;"></a-entity>
 
         <!-- Camera Rig -->
         <a-entity id="rig" gravity position="2000 6.449 -27.325">
