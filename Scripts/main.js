@@ -4,11 +4,14 @@ import 'aframe-extras/loaders';
 import 'aframe-gltf-model-plus';
 import 'aframe-haptics';
 import 'aframe-extras/primitives';
+import 'aframe-look-at-component';
+import 'aframe-randomizer-component';
 
 import { transition } from './Utils/transitionScreen.js';
 import { setSong, fade, playSound } from './Utils/sound.js';
 import { objectiveVR } from './Utils/objectives.js';
 import { haptics } from './Utils/haptics.js';
+import { setTooltip, tooltipVisibility } from './Utils/tooltip.js';
 
 const cursor = document.getElementById('cursor');
 const camera = document.getElementById('camera');
@@ -21,7 +24,6 @@ const scene = document.querySelector('a-scene');
 const text = document.getElementById('subtitles');
 const vrObjective = document.getElementById('vrObjective');
 const interactables = document.querySelectorAll('.interactable');
-const tree = document.getElementById("tree");
 
 // VR Controllers
 const leftHand = document.getElementById('left-hand');
@@ -34,6 +36,7 @@ const blockSound = '#block-sfx';
 
 //Runtime Stuff
 let clickDebounce = false;
+let hoveringOver = null;
 
 leftHand.addEventListener('xbuttondown', () => {
     objectiveVR(true);
@@ -71,11 +74,16 @@ interactables.forEach(object => {
             haptics(leftHand, "click");
             const logicId = object.getAttribute('data-logic');
             clickDebounce = true;
+            if (object.classList.contains('informative')) {
+                const infoLogic = await import('./Utils/info.js');
+                infoLogic.handle(object);
+            }
 
             try {
                 const targetLogic = await import(`./Objects/${logicId}.js`);
                 if (targetLogic?.handle) {
                     targetLogic.handle(object);
+                    object.setAttribute("marker", "false");
                 } else {
                     console.warn(`No 'handle' function found in ${logicId}.js`);
                 }
@@ -118,12 +126,21 @@ interactables.forEach(object => {
 
     object.addEventListener('mouseenter', (e) => {
         if (object.getAttribute('disabled') || e.detail.cursorEl == rightHand) {
+            haptics(rightHand, "hover");
             e.detail.cursorEl.setAttribute('raycaster', 'lineColor', '#FF0000');
             return;
         } else {
             haptics(leftHand, "hover");
             object.emit('enter');
             playSound(hoverSound, "sfxPlayer");
+            hoveringOver = object;
+            if (object.classList.contains("animal")) {
+                if (scene.is('vr-mode')) {
+                    setTooltip("Press 'Y' to Taunt / Left Trigger to Get Information", false);
+                    return;
+                }
+                setTooltip("Press 'E' to Taunt / Click to Get Information", false);
+            }
         };
     });
 
@@ -133,6 +150,8 @@ interactables.forEach(object => {
             e.detail.cursorEl.setAttribute('raycaster', 'lineColor', '#e5f5a9');
         } else {
             object.emit('leave');
+            hoveringOver = null;
+            tooltipVisibility(false);
         };
     });
 });
@@ -167,3 +186,19 @@ startButton.addEventListener('click', () => {
 startButton.addEventListener('mouseenter', () => {
     document.getElementById('hover-sfx').play();
 })
+
+window.addEventListener('keydown', async (e) => {
+    if (hoveringOver && e.key === 'e' && hoveringOver.classList.contains("animal")) {
+        const logicId = hoveringOver.getAttribute('data-logic');
+        const targetLogic = await import(`./Objects/${logicId}.js`);
+        targetLogic.handle(hoveringOver);
+    }
+});
+
+leftHand.addEventListener('ybuttondown', async () => {
+    if (hoveringOver && hoveringOver.classList.contains("animal")) {
+        const logicId = hoveringOver.getAttribute('data-logic');
+        const targetLogic = await import(`./Objects/${logicId}.js`);
+        targetLogic.handle(hoveringOver);
+    }
+});

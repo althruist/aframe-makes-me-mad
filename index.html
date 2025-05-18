@@ -27,7 +27,9 @@
         "aframe-extras/loaders": "https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.loaders.min.js",
         "aframe-gltf-model-plus": "https://cdn.jsdelivr.net/gh/c-frame/aframe-gltf-model-plus@1.2.0/dist/gltf-model-plus.min.js",
         "aframe-haptics": "https://unpkg.com/aframe-haptics-component/dist/aframe-haptics-component.min.js",
-        "aframe-extras/primitives": "https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.primitives.min.js"
+        "aframe-extras/primitives": "https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.4/dist/aframe-extras.primitives.min.js",
+        "aframe-look-at-component": "https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js",
+        "aframe-randomizer-component": "https://unpkg.com/aframe-randomizer-components@3.0.2/dist/aframe-randomizer-components.min.js"
       }
     }
 </script>
@@ -40,6 +42,7 @@
     <script src="./Scripts/Components/render-order.js" type="module"></script>
     <script src="./Scripts/Components/walk.js" type="module"></script>
     <script src="./Scripts/Components/thumbstick-logging.js" type="module"></script>
+    <script src="./Scripts/Components/marker.js" type="module"></script>
 
     <script src="Scripts/main.js" type="module"></script>
     <link rel="icon" href="Images/Icon.ico" type="image/x-icon" />
@@ -48,8 +51,8 @@
 
 <body>
     <!-- Videos -->
-    <video id="spinningtree-video" autoplay loop="true" src="Videos/Spinning_Tree_Silhouette.mp4.mov" volume="0"
-        playsinline webkit-playsinline></video>
+    <video id="spinningtree-video" autoplay loop="true" src="Videos/SpinningTreeSilhouette.mp4" volume="0" playsinline
+        webkit-playsinline></video>
 
     <div id="start-screen">
         <button id="start-button" onclick="startGame()">
@@ -64,59 +67,93 @@
 
         <a-assets timeout="10000">
             <!-- Models -->
-            <a-asset-item id="forestnavmesh-model" src="Models/forest_navmesh.glb"></a-asset-item>
-            <a-asset-item id="forestterrain-model" src="Models/forest_terrain.glb"></a-asset-item>
+            <a-asset-item id="forestnavmesh-model" src="Models/ForestNavMesh.glb"></a-asset-item>
+            <a-asset-item id="forestterrain-model" src="Models/ForestTerrain.glb"></a-asset-item>
+            <a-asset-item id="oceanterrain-model" src="Models/OceanTerrain.glb"></a-asset-item>
 
-            <a-asset-item id="spacenav-model" src="Models/spacenav.glb"></a-asset-item>
-            <a-asset-item id="tree-model" src="Models/tree.glb"></a-asset-item>
-            <a-asset-item id="panel-model" src="Models/panel.glb"></a-asset-item>
-            <a-asset-item id="title-model" src="Models/title.glb"></a-asset-item>
+            <a-asset-item id="spacenav-model" src="Models/SpaceNavMesh.glb"></a-asset-item>
+            <a-asset-item id="tree-model" src="Models/Tree.glb"></a-asset-item>
+            <a-asset-item id="panel-model" src="Models/Panel.glb"></a-asset-item>
+            <a-asset-item id="title-model" src="Models/Title.glb"></a-asset-item>
+            <a-asset-item id="bird-model" src="Models/Bird.glb"></a-asset-item>
 
             <!-- Sound -->
-            <audio id="footsteps-sfx" src="Sound/SFX/Footsteps.wav" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="footsteps-sfx" src="Sound/SFX/Footsteps.mp3" preload="auto" crossorigin="anonymous"></audio>
 
-            <audio id="start-sfx" src="Sound/SFX/Start.wav" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="start-sfx" src="Sound/SFX/Start.mp3" preload="auto" crossorigin="anonymous"></audio>
 
-            <audio id="hover-sfx" src="Sound/SFX/Cursor/Hover.wav" preload="auto" crossorigin="anonymous"></audio>
-            <audio id="click-sfx" src="Sound/SFX/Cursor/Click.wav" preload="auto" crossorigin="anonymous"></audio>
-            <audio id="block-sfx" src="Sound/SFX/Cursor/Block.wav" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="hover-sfx" src="Sound/SFX/Cursor/Hover.mp3" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="click-sfx" src="Sound/SFX/Cursor/Click.mp3" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="block-sfx" src="Sound/SFX/Cursor/Block.mp3" preload="auto" crossorigin="anonymous"></audio>
 
+            <audio id="openpanel-sfx" src="Sound/SFX/InfoPanel/Open.mp3" preload="auto" crossorigin="anonymous"></audio>
 
-            <audio id="objectivecleared-sfx" src="Sound/SFX/Objectives/ObjectiveCleared.wav" preload="auto"
+            <audio id="chirp1-bird-sfx" src="Sound/SFX/Animals/Bird/Chirp1.mp3" preload="auto"
                 crossorigin="anonymous"></audio>
-            <audio id="newobjective-sfx" src="Sound/SFX/Objectives/NewObjective.wav" preload="auto"
+            <audio id="chirp2-bird-sfx" src="Sound/SFX/Animals/Bird/Chirp2.mp3" preload="auto"
+                crossorigin="anonymous"></audio>
+            <audio id="chirp3-bird-sfx" src="Sound/SFX/Animals/Bird/Chirp3.mp3" preload="auto"
+                crossorigin="anonymous"></audio>
+            <audio id="chirp4-bird-sfx" src="Sound/SFX/Animals/Bird/Chirp4.mp3" preload="auto"
+                crossorigin="anonymous"></audio>
+            <audio id="chirp5-bird-sfx" src="Sound/SFX/Animals/Bird/Chirp5.mp3" preload="auto"
                 crossorigin="anonymous"></audio>
 
-            <audio id="space-song" src="Sound/Music/space.wav" preload="auto" crossorigin="anonymous"></audio>
-            <audio id="forest-song" src="Sound/Music/forest.wav" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="objectivecleared-sfx" src="Sound/SFX/Objectives/ObjectiveCleared.mp3" preload="auto"
+                crossorigin="anonymous"></audio>
+            <audio id="newobjective-sfx" src="Sound/SFX/Objectives/NewObjective.mp3" preload="auto"
+                crossorigin="anonymous"></audio>
+
+            <audio id="space-song" src="Sound/Music/Space.mp3" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="forest-song" src="Sound/Music/Forest.mp3" preload="auto" crossorigin="anonymous"></audio>
+            <audio id="ocean-song" src="Sound/Music/Ocean.mp3" preload="auto" crossorigin="anonymous"></audio>
 
             <!-- Cubemaps -->
             <a-cubemap id="forest-cubemap">
-                <img src="Images/Cubemaps/Teleporters/Forest.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Forest.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Forest.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Forest.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Forest.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Forest.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Forest.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Forest.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Forest.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Forest.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Forest.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Forest.webp"></img>
             </a-cubemap>
 
             <a-cubemap id="ocean-cubemap">
-                <img src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
-                <img src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
+                <img alt="" src="Images/Cubemaps/Teleporters/Ocean.webp"></img>
             </a-cubemap>
 
             <a-cubemap id="forestsky-cubemap">
-                <img src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
-                <img src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
-                <img src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
-                <img src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
-                <img src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
-                <img src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
+                <img alt="" src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
+                <img alt="" src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
+                <img alt="" src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
+                <img alt="" src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
+                <img alt="" src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
+                <img alt="" src="Images/Cubemaps/ForestSky/ForestSkyCubemap.webp"></img>
             </a-cubemap>
+
+            <!-- Images -->
+            <img id="roughness-panel" alt="" src="Images/Panels/Rough.png">
+
+            <img id="bird-panel" alt="" src="Images/Panels/Forest/bird.png">
+
+            <!-- Models -->
+            <a-entity id="marker">
+                <a-plane src="Images/Marker.png" scale="0.73 1 1"
+                    material="shader: flat; side: double; toneMapped: true; transparent: true" depthTest='false'
+                    render-order="997" look-at="[camera]"></a-plane>
+            </a-entity>
+
+            <a-entity id="info-panel" position="2 -1 1" look-at="[camera]" render-order="998">
+                <a-plane id="info-content" width="2" height="3" scale="0 0 0" transparent="true" depthTest='false'
+                    render-order="998"
+                    material="metalness: 0; roughnessMap: #roughness-panel; opacity: 0; side: double;">
+                </a-plane>
+            </a-entity>
         </a-assets>
 
         <!-- Scene Objects -->
@@ -125,8 +162,7 @@
         <a-entity id="forest-nav" class="navobject" position="0 0 0" gltf-model="#forestnavmesh-model" nav-mesh
             visible='false'></a-entity>
 
-        <a-entity id="forest-terrain" shadow="cast: false" position="0 0 0" gltf-model="#forestterrain-model"
-            shadow="receive: true;"></a-entity>
+        <a-entity id="forest-terrain" position="0 0 0" gltf-model="#forestterrain-model"></a-entity>
 
         <a-sky id="forest-sky" rotation="0 -100 0" src='Images/Skies/ForestSky.webp' material='fog: false;'
             position='0 0 0'></a-sky>
@@ -134,31 +170,217 @@
         <a-entity id="sun" position="478.68068 134.97016 -7.27475" geometry="primitive: cylinder"
             material="emissive: #fffdb8; fog: false; emissiveIntensity: 100" rotation="0 180 90" scale="2 1 2">
             <a-light id="light-sun"
-                light="distance: 1000; decay: -0.17; angle: 112.95; castShadow: true; intensity: 1; color: #ffd080; type: spot; penumbra: 1; shadowCameraVisible: false; shadowBias: 0; shadowCameraBottom: 0; shadowCameraFar: 6.51; shadowRadius: 0.63; shadowCameraFov: 90; shadowCameraNear: 3.08"
+                light="distance: 1000; decay: -0.17; angle: 112.95; intensity: 1; color: #ffd080; type: spot; penumbra: 1;"
                 rotation="-90 0 0"></a-light>
         </a-entity>
 
-        <a-entity id="tree" position="-8.50375 3.40519 9.34031" gltf-model="#tree-model" animation-mixer="clip: Idle;"
-            shadow="cast: true;"></a-entity>
+        <a-entity id="bird" class="interactable informative animal" rotation="-8.9 92.62 -16.15"
+            position="-16.6742 5.51694 34.17358" gltf-model="#bird-model"
+            animation-mixer="useRegExp:true; clip:Idle;" data-logic="bird" sound></a-entity>
 
-        <a-ocean id="ocean" ocean="depth: 800; density: 150" position="247.52758 1.48827 88.95824" width="500" depth="500" color="#83C4EC" density="100"
+        <a-ocean id="ocean" ocean="depth: 800; density: 150" position="247.52758 1.48827 88.95824" width="500"
+            depth="500" color="#83C4EC" density="100"
             material="metalness: 1; roughness: 0; ambientOcclusionMapIntensity: 1; flatShading: true; color: #a9cefe; displacementScale: 1; dithering: true; envMap: #forestsky-cubemap"></a-ocean>
+
+        <a-ocean id="freshwater" rotation="-90 0 0"
+            ocean="depth: 80; density: 10; width: 90; opacity: -0.08; color: #94cbcc; speedVariance: 1; speed: 0.5; amplitude: 0.05"
+            position="93.68577 12.96343 -50.50696" width="500" depth="500" color="#83C4EC" density="100"
+            material="metalness: 1; roughness: 0; ambientOcclusionMapIntensity: 1; flatShading: true; color: #94cbcc; displacementScale: 1; dithering: true; envMap: #forestsky-cubemap; opacity: 1"></a-ocean>
 
         <a-light id="ambient-light" light="color: #384c7a; type: ambient; intensity: 1.37"
             position="-1.94109 6.09543 -2.08689"></a-light>
 
+        <!-- Trees -->
+        <a-entity id="tree" class="tree" position="-17.04895 3.55947 33.20467" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="1 1 1"></a-entity>
+
+        <a-entity id="tree-2" class="tree" position="-8.75855 3.11623 39.78998" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="3 3 3" random-rotation="min: 0 0 0; max: 0 360 0;"></a-entity>
+
+        <a-entity id="tree-3" class="tree" position="-33.51632 3.15403 31.23607" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="5 5 5" random-rotation="min: 0 0 0; max: 0 360 0;"></a-entity>
+
+        <a-entity id="tree-4" class="tree" position="-24.87922 3.15403 31.23607" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="1.5 1.5 1.5"
+            random-rotation="min: 0 0 0; max: 0 360 0;"></a-entity>
+
+        <a-entity id="tree-5" class="tree" position="-9.49306 2.76221 29.55626" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="10 10 10" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-6" class="tree" position="0.41885 2.76221 31.93959" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="6 6 6" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-7" class="tree" position="-24.3145 2.76221 42.74572" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="4 4 4" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-8" class="tree" position="-23.0281 3.14211 28.40983" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="3 3 3" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-9" class="tree" position="3.48094 3.87213 6.13764" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="4 4 4" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-10" class="tree" position="17.27808 3.91373 8.35106" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="11 11 11" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-11" class="tree" position="10.32501 3.87213 -0.95703" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="3 3 3" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-12" class="tree" position="8.97339 3.87213 -9.36068" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="10 10 10" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-13" class="tree" position="20.17961 3.87213 -8.46837" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="15 15 15" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-14" class="tree" position="13.8664 3.87213 -25.37862" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="5 5 5" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-15" class="tree" position="22.08321 3.87213 -34.69117" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="6 6 6" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-16" class="tree" position="15.88588 3.87213 -55.0786" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="9 9 9" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-17" class="tree" position="15.88588 3.87213 -75.47572" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="20 20 20" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-18" class="tree" position="39.10064 3.87213 2.29712" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="12 12 12" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-19" class="tree" position="55.20173 3.87213 17.18112" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="6 6 6" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-20" class="tree" position="67.4792 3.87213 31.47533" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="13 13 13" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-21" class="tree" position="66.78475 3.87213 12.41098" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="25 25 25" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-22" class="tree" position="3.48094 28.61391 66.8638" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="30 30 30" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-23" class="tree" position="-26.49875 28.61391 70.68731" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="15 15 15" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-24" class="tree" position="1.02399 26.42383 96.72309" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="20 20 20" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-25" class="tree" position="-20.11255 29.76653 81.42025" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="8 8 8" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-26" class="tree" position="-13.47216 27.58494 62.96849" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="8 8 8" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-27" class="tree" position="18.83354 28.46627 60.13457" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="17 17 17" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-28" class="tree" position="33.64173 24.11114 92.26874" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="30 30 30" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-29" class="tree" position="-45.02315 28.61391 39.55778" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="12 12 12" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-30" class="tree" position="-55.94615 32.19089 79.43633" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="23 23 23" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-31" class="tree" position="-74.01498 26.79474 47.52368" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="15 15 15" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-32" class="tree" position="-84.44797 25.4716 41.24979" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="14 14 14" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-33" class="tree" position="-62.64936 25.4716 37.57015" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="10 10 10" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-34" class="tree" position="-40.57362 28.43971 63.23927" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="18 18 18" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-35" class="tree" position="-43.29813 20.57251 -53.2552" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="30 30 30" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-36" class="tree" position="-51.98245 20.57251 -18.75365" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="25 25 25" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-37" class="tree" position="-68.77604 27.83733 -34.6833" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="16 16 16" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-38" class="tree" position="-69.71576 24.42751 -23.58327" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="12 12 12" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-39" class="tree" position="-79.34273 28.93147 -28.9688" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="7 7 7" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-40" class="tree" position="-74.59659 30.1583 -35.19567" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="5 5 5" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-41" class="tree" position="-61.7175 28.71205 -54.10352" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="14 14 14" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-42" class="tree" position="-51.52553 26.40729 -82.37983" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="14 14 14" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-43" class="tree" position="-88.46625 24.06751 145.9859" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="80 80 80" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-44" class="tree" position="-31.31293 24.06751 230.64705" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="60 60 60" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-45" class="tree" position="-146.64163 69.89751 224.89878" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="40 40 40" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-46" class="tree" position="-155.1522 67.20177 125.3116" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="20 20 20" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-47" class="tree" position="-229.70137 130.96728 -107.62318" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="20 20 20" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-48" class="tree" position="47.1436 9.21971 128.59109" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="40 40 40" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-49" class="tree" position="79.54803 9.21971 126.75652" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="20 20 20" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-50" class="tree" position="49.25085 35.0559 181.00478" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="40 40 40" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-51" class="tree" position="81.26069 35.0559 181.00478" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="30 30 30" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-52" class="tree" position="51.93895 37.44502 212.77505" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="36 36 36" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-53" class="tree" position="51.93895 37.44502 401.84178" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="36 36 36" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-54" class="tree" position="119.24755 50.45886 423.45606" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="20 20 20" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-55" class="tree" position="-3.65182 55.05665 468.82235" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="24 24 24" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-56" class="tree" position="247.51742 89.43741 -274.88688" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="25 25 25" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-57" class="tree" position="166.51732 89.43741 -200.67815" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="20 20 20" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-58" class="tree" position="-108.15235 46.96139 1.21457" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="12 12 12" random-rotation="max: 0 360 0"></a-entity>
+
+        <a-entity id="tree-59" class="tree" position="-100.30785 46.96139 18.81759" gltf-model="Models/Tree.glb"
+            animation-mixer="clip: Underground" scale="20 20 20" random-rotation="max: 0 360 0"></a-entity>
+
         <!-- Menu Scene -->
-        <a-sky id="menu-sky" position="1969.37739 9.74824 -32.33297" src='Images/Skies/MenuSky/MenuSky.webp'
+        <a-sky id="menu-sky" position="1969.37739 9.74824 -32.33297" src="Images/Skies/MenuSky/MenuSky.webp"
             material='fog: false; ' position='2010 0 0'></a-sky>
 
         <a-entity id="space-nav" class="navobject" position="2000 6.449 -27.325" scale='0.1 0.1 0.1'
             gltf-model="#spacenav-model" visible="false" nav-mesh animation-mixer></a-entity>
 
         <a-box id="box" scale="6.42 1 1" class="interactable" color="white" data-logic="box" emissive="magenta"
-            clickonce="true" position="-10.79282 5.83473 6.3753" shadow="cast: true;"></a-box>
+            position="-10.79282 5.83473 6.3753"></a-box>
 
-        <a-box id="box1" scale="3 1 1" class="interactable" color="blue" data-logic="box1" emissive="red"
-            position="-10.11017 5.27547 4.58432" shadow="cast: true;"></a-box>
+        <a-box id="box1" scale="0.27 0.3 0.23" class="interactable" color="blue" data-logic="treeForestScene"
+            emissive="red" position="4.30312 5.27547 -68.08476" clickonce="true"></a-box>
 
         <a-entity id="panel" rotation="180 90 0" gltf-model="Models/panel.glb" position="2000.018 7.956 -30.34"
             animation__mild="property: position; to: 2000.01753 8 -30.33968; dur: 2000; dir: alternate; easing: easeInOutSine; loop: true;">
@@ -173,24 +395,42 @@
 
         <a-gltf-model id='title' src="#title-model" position="1999.65 9.5 -30" rotation="0 0 180"></a-gltf-model>
 
+        <!-- Ocean Scene -->
+        <a-sky id="ocean-sky" rotation="0 -100 0" src="Images/Skies/OceanSky.webp" material="fog: false"
+            position="-2000 0 0"></a-sky>
+
+        <a-entity id="ocean-nav" class="navobject" position="-2000 0 0" gltf-model="#oceanterrain-model" nav-mesh
+            visible='false'></a-entity>
+
+        <a-entity id="ocean-terrain" position="-2000 0 0" gltf-model="#oceanterrain-model"></a-entity>
+
+        <a-entity light="color: #42e0ff; decay: 0.67; distance: 10000; intensity: 100; type: spot"
+            position="-1989.5491 9.22231 162.28635"></a-entity>
+
         <!-- Camera Rig -->
         <a-entity id="rig" gravity position="2000 6.449 -27.325">
 
-            <a-camera id="camera" camera="fov: 90; zoom: 1" nav-mesh-constrained="offset: 0 1.6 0"
+            <a-camera id="camera" camera="fov: 90; zoom: 1; active: true;" nav-mesh-constrained="offset: 0 1.6 0"
                 wasd-controls="acceleration: 16" walk="false" nav-offset-animator="0 1.6 0"
                 animation__walk="property: nav-offset-animator; to: 0 1.7 0; easing: easeInOutSine; dir: alternate; dur: 250; loop: true; startEvents: walkAnim; pauseEvents: stopAnim; resumeEvents: walkAnim;"
                 animation__stop="property: nav-offset-animator; to: 0 1.6 0; dir: alternate; dur: 500; loop: true; easing: easeInOutSine; startEvents: stopAnim; pauseEvents: walkAnim; resumeEvents: stopAnim;">
 
-                <a-text id="subtitles" value="" position="0.06211 -1 -1.20656"
+                <a-text id="subtitles" value="" position="0 -0.89 -1"
                     material='fog: false; depthTest: false; transparent: true;' render-order="999"
-                    text="align: center; anchor: center; value: ; width: 1.52; opacity: 0;"
+                    text="align: center; anchor: center; value: ; width: 1.32; opacity: 0; shader: msdf; font:https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/meerainimai/MeeraInimai-Regular.json;"
                     animation__show="property: opacity; to: 1; dur: 500; easing: easeOutSine; startEvents: show;"
                     animation__hide="property: opacity; to: 0; dur: 500; easing: easeOutSine; startEvents: hide;"></a-text>
 
+                <a-text id="tooltip" value="test" position="0 -0.09164 -1"
+                    material='fog: false; depthTest: false; transparent: true;' render-order="999"
+                    text="align: center; anchor: center; value: ; width: 0.98; opacity: 0; shader: msdf; font:https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/meerainimai/MeeraInimai-Regular.json;"
+                    animation__show="property: opacity; to: 1; dur: 250; easing: easeOutSine; startEvents: show;"
+                    animation__hide="property: opacity; to: 0; dur: 250; easing: easeOutSine; startEvents: hide;"></a-text>
 
                 <a-text id="objective" class="objectiveText" position="0 1.1 -1"
-                    text="value:No Objectives Yet; align: center; width: 2"
-                    animation__show="property: position; to: 0 0.9 -1; dur: 250; easing: easeOutQuad; startEvents: show"
+                    text="value:No Objectives Yet; align: center; width: 2; shader: msdf; font:https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/meerainimai/MeeraInimai-Regular.json;"
+                    depthTest='false' render-order="999"
+                    animation__show="property: position; to: 0 0.8 -1; dur: 250; easing: easeOutQuad; startEvents: show"
                     animation__hide="property: position; to: 0 1.1 -1; dur: 250; easing: easeOutQuad; startEvents: hide">
                 </a-text>
 
@@ -231,8 +471,9 @@
                 haptics smooth-locomotion="target: #rig; reference: #camera" joystick-listener
                 raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1; enabled: true;">
                 <a-text id="vrObjective" class="objectiveText" scale="0.1 0.1 10" rotation="-90 90 0"
-                    position="-0.1 0 0" opacity="0" align="center" anchor="center" depth-test='false' value=""
-                    visible="false" render-order="999" text="value: No Objectives Yet"
+                    position="-0.1 0 0" opacity="0" align="center" anchor="center" depthTest="false" value=""
+                    visible="false" render-order="999"
+                    text="value: No Objectives Yet; shader: msdf; font:https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/meerainimai/MeeraInimai-Regular.json;"
                     animation__show="property: position; to: -0.05 0 0; dur: 500; easing: easeOutCubic; startEvents: show;"
                     animation__show1="property: opacity; to: 1; dur: 500; easing: easeOutCubic; startEvents: show;"
                     animation__hide="property: position; to: -0.1 0 0; dur: 500; easing: easeOutCubic; startEvents: hide;"
@@ -243,6 +484,9 @@
             <a-entity id="right-hand" meta-touch-controls="hand: right" laser-controls="hand: right" haptics
                 smooth-turn="target: #rig; reference: #camera; turnSpeed: 180"
                 raycaster="objects: .interactable; far: 4; lineColor: #e5f5a9; lineOpacity: 1; enabled: true;"></a-entity>
+        </a-entity>
+
+        <a-entity id="cinematic-camera" camera="active: false" position="0 1.6 5" rotation="0 180 0">
         </a-entity>
     </a-scene>
 </body>

@@ -25,7 +25,7 @@ export async function handle(object) {
     await setSubtitle("Lorem ipsum is simply dummy text", false, 2);
     await setSubtitle("f-of-f", false, 1);
     await setSubtitle("of the printing", false, 0.5);
-    tree.setAttribute('animation-mixer', 'clip', 'Test');
+    // tree.setAttribute('animation-mixer', 'clip', 'Test');
     await setSubtitle("aand", false, 1);
     await setSubtitle("type setting industry", false, 2);
     object.setAttribute('color', 'black');

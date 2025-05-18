@@ -12,9 +12,21 @@ const leftHand = document.getElementById('left-hand');
 let isDisabled = false;
 let debounce = false;
 
-export async function setObjective(text) {
-    if (objective.getAttribute('text', 'value').value !== "No Objectives Yet") {
+export async function setObjective(text, edit) {
+    if (objective.getAttribute('text', 'value').value !== "No Objectives Yet" && !edit) {
         await finishObjective();
+    }
+    if (edit) {
+        objective.emit("show");
+        vrObjective.emit("show");
+        objective.setAttribute('text', 'value', `Objective: ${text}`);
+        vrObjective.setAttribute('text', 'value', `Objective: ${text}`);
+        haptics(leftHand, "hover");
+        setTimeout(() => {
+            objective.emit("hide");
+            vrObjective.emit("hide");
+            isDisabled = false;
+        }, 2000);
     }
     if (isDisabled) {
         console.warn("Objectives are disabled. You cannot set them... yet.");
@@ -40,7 +52,7 @@ document.addEventListener('keydown', (event) => {
             console.warn("Objectives are disabled. You cannot set them... yet.");
             return;
         }
-        if(debounce){
+        if (debounce) {
             return;
         }
         debounce = true;
