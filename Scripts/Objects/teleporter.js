@@ -70,7 +70,6 @@ export async function handle(teleporter) {
             oceanTeleport.setAttribute('position', '-0.022 0.004 0.043');
             teleporter.remove();
             setMusic('#forestentrance-music', 0.2);
-            oceanTeleport.setAttribute("disabled", false);
         }, 3000);
     } else if (teleporter.id == 'ocean-teleport') {
         setTimeout(() => {

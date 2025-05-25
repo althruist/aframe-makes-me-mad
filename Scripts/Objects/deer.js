@@ -1,6 +1,7 @@
 import { viewport } from "../Utils/cinematic.js";
 import { setObjective } from "../Utils/objectives.js";
 const spaceTeleport = document.getElementById("space-teleport");
+const oceanTeleport = document.getElementById("ocean-teleport");
 
 let objectiveSent = false;
 
@@ -25,6 +26,7 @@ export async function handle(deer, pressedE) {
 
     if (pressedE) { return; };
     if (objectiveSent) { return; };
+    oceanTeleport.setAttribute("disabled", false);
     spaceTeleport.setAttribute('animation', {
         property: 'position',
         to: '-14.99106 3.04666 0.23',
