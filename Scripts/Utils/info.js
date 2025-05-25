@@ -38,6 +38,14 @@ export function handle(object) {
 
     if (object.id == "bird") {
         imageEntity.setAttribute('material', 'src: #bird-panel;')
+    } else if (object.id == "deer2") {
+        imageEntity.setAttribute('material', 'src: #deer-panel;')
+    } else if (object.id == "turtle") {
+        imageEntity.setAttribute('material', 'src: #turtle-panel;')
+    } else if (object.id == "fish") {
+        imageEntity.setAttribute('material', 'src: #fish-panel;')
+    } else if (object.id == "coral") {
+        imageEntity.setAttribute('material', 'src: #coral-panel;')
     }
 
     planeEntity.addEventListener('animationcomplete', () => {

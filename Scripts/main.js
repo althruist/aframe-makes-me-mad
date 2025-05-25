@@ -6,9 +6,10 @@ import 'aframe-haptics';
 import 'aframe-extras/primitives';
 import 'aframe-look-at-component';
 import 'aframe-randomizer-component';
+import 'aframe-particle-system-component';
 
 import { transition } from './Utils/transitionScreen.js';
-import { setSong, fade, playSound } from './Utils/sound.js';
+import { setAmbience, playSound } from './Utils/sound.js';
 import { objectiveVR } from './Utils/objectives.js';
 import { haptics } from './Utils/haptics.js';
 import { setTooltip, tooltipVisibility } from './Utils/tooltip.js';
@@ -64,6 +65,8 @@ scene.addEventListener('exit-vr', () => {
 
 interactables.forEach(object => {
     object.addEventListener('click', async (e) => {
+        leftHand.setAttribute('raycaster', 'lineColor', '#e5f5a9');
+        tooltipVisibility(false);
         if (object.getAttribute('disabled') || (e.detail && e.detail.cursorEl == rightHand && !cursor.getAttribute('raycaster').enabled)) {
             cursor.emit("block");
             playSound(blockSound, "sfxPlayer");
@@ -79,10 +82,20 @@ interactables.forEach(object => {
                 infoLogic.handle(object);
             }
 
+            if (object.classList.contains("pickable")) {
+                object.setAttribute('disabled', true);
+                object.setAttribute('visible', false);;
+            }
+
+            if (object.getAttribute("init")) {
+                const initLogic = await import(`./Objectives/${object.getAttribute("init")}.js`);
+                initLogic.init();
+            }
+
             try {
                 const targetLogic = await import(`./Objects/${logicId}.js`);
                 if (targetLogic?.handle) {
-                    targetLogic.handle(object);
+                    targetLogic.handle(object, false);
                     object.setAttribute("marker", "false");
                 } else {
                     console.warn(`No 'handle' function found in ${logicId}.js`);
@@ -135,11 +148,13 @@ interactables.forEach(object => {
             playSound(hoverSound, "sfxPlayer");
             hoveringOver = object;
             if (object.classList.contains("animal")) {
-                if (scene.is('vr-mode')) {
-                    setTooltip("Press 'Y' to Taunt / Left Trigger to Get Information", false);
-                    return;
-                }
-                setTooltip("Press 'E' to Taunt / Click to Get Information", false);
+                setTooltip(scene.is('vr-mode') ? "Press 'Y' to Taunt / Left Trigger to Get Info" : "Press 'E' to Taunt / Click to Get Information", false);
+            } else if (object.classList.contains("pickable")) {
+                setTooltip(scene.is('vr-mode') ? "Press Left Trigger to Pick Up" : "Click to Pick Up", false);
+            } else if (object.classList.contains("informative") && !object.classList.contains("animal")) {
+                setTooltip(scene.is('vr-mode') ? "Press Left Trigger to Get Info" : "Click to Get Information", false);
+            } else {
+                setTooltip(scene.is('vr-mode') ? "Press Left Trigger to Interact" : "Click to Interact", false);
             }
         };
     });
@@ -148,6 +163,7 @@ interactables.forEach(object => {
         if (clickDebounce) return;
         if (object.getAttribute('disabled') || e.detail.cursorEl == rightHand) {
             e.detail.cursorEl.setAttribute('raycaster', 'lineColor', '#e5f5a9');
+            leftHand.setAttribute('raycaster', 'lineColor', '#e5f5a9');
         } else {
             object.emit('leave');
             hoveringOver = null;
@@ -166,10 +182,9 @@ cursor.addEventListener('animationcomplete__block', function () {
 
 function onStartClick() {
     startButton.removeEventListener("click", onStartClick);
-    document.title = "EnvVR - Scene Selection";
-    setSong('#space-song');
-    setTimeout(() => transition(), 3000);
-    setTimeout(() => fade('in'), 3000);
+    document.title = "EnvVR - Space";
+    setAmbience('#space-ambience');
+    transition(true, 2000);
 }
 
 scene.addEventListener('loaded', () => {
@@ -191,7 +206,7 @@ window.addEventListener('keydown', async (e) => {
     if (hoveringOver && e.key === 'e' && hoveringOver.classList.contains("animal")) {
         const logicId = hoveringOver.getAttribute('data-logic');
         const targetLogic = await import(`./Objects/${logicId}.js`);
-        targetLogic.handle(hoveringOver);
+        targetLogic.handle(hoveringOver, true);
     }
 });
 
@@ -199,6 +214,6 @@ leftHand.addEventListener('ybuttondown', async () => {
     if (hoveringOver && hoveringOver.classList.contains("animal")) {
         const logicId = hoveringOver.getAttribute('data-logic');
         const targetLogic = await import(`./Objects/${logicId}.js`);
-        targetLogic.handle(hoveringOver);
+        targetLogic.handle(hoveringOver, true);
     }
 });

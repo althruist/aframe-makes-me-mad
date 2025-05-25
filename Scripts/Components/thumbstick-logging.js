@@ -1,9 +1,12 @@
+const footstepsPlayer = document.getElementById('footsteps-player');
+let isWalking = false;
+
 AFRAME.registerComponent('thumbstick-logging', {
     init: function () {
         this.el.addEventListener('thumbstickmoved', this.logThumbstick);
     },
     logThumbstick: function (evt) {
-        if (!canWalk) return;
+        if (camera.getAttribute("walk") == false) return;
 
         const x = evt.detail.x;
         const y = evt.detail.y;

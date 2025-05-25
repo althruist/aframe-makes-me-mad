@@ -1,7 +1,6 @@
 let animationQueue = [];
 let isAnimating = false;
 
-const rig = document.getElementById("rig");
 const camera = document.getElementById("camera");
 const cinematicCamera = document.getElementById("cinematic-camera");
 
@@ -53,6 +52,10 @@ export function viewport(action, options = {}) {
     const { property, from, to, dur, easing, autoStop = false, camPosition, camRotation } = options;
 
     if (action === "animate") {
+        if (scene.is('vr-mode')) {
+            console.warn("Cinematics are disabled, you're in VR mode.");
+            return;
+        }
         animationQueue.push({ property, from, to, dur, easing, autoStop, camPosition, camRotation });
         processQueue();
     } else if (action === "stop") {
@@ -64,10 +67,14 @@ function processQueue() {
     if (isAnimating || animationQueue.length === 0) return;
 
     isAnimating = true;
-    const { property, from, to, dur, easing, autoStop, camPosition, camRotation } = animationQueue.shift();
+    const { property, from, to, dur, easing, autoStop, camPosition = null, camRotation = null } = animationQueue.shift();
 
     switchCamera('cinematic');
-    cinematicCamera.setAttribute('rotation', camRotation);
+    if (camPosition) {
+        cinematicCamera.setAttribute('position', camPosition);
+    } else if (camRotation) {
+        cinematicCamera.setAttribute('rotation', camRotation);
+    }
     cinematicCamera.setAttribute('animation', {
         property,
         from,

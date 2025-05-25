@@ -1,6 +1,9 @@
 import { setObjective } from "../Utils/objectives.js";
 
-export async function handle(bird) {
+const bucket = document.getElementById("bucket");
+let objectiveSent = false
+
+export function handle(bird, pressedE) {
     bird.setAttribute('animation-mixer', 'clip', 'Tease');
     bird.setAttribute('animation-mixer', 'loop', 'once');
     bird.setAttribute('sound', {
@@ -17,4 +20,11 @@ export async function handle(bird) {
         bird.setAttribute('animation-mixer', 'clip', 'Idle');
         bird.setAttribute('animation-mixer', 'loop', 'repeat');
     });
+
+    if (pressedE) { return; };
+    if (objectiveSent) { return; };
+    objectiveSent = true;
+    setObjective("Collect the Bucket", false);
+    bucket.setAttribute('position', '-71 14.565 23.076');
+    bucket.setAttribute('marker', true);
 }

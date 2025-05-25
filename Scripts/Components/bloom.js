@@ -1,11 +1,4 @@
 /* global THREE */
-/**
- * Unreal Bloom Effect
- * Implementation for A-Frame
- * Code modified from Akbartus's post-processing A-Frame integration
- * https://github.com/akbartus/A-Frame-Component-Postprocessing
- */
-
 import AFRAME from 'aframe';
 
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -20,93 +13,134 @@ AFRAME.registerComponent('bloom', {
     strength: { type: 'number', default: 0.5 },
     radius: { type: 'number', default: 1 }
   },
-  events: {
-    rendererresize: function () {
-      if (!this.composer) { return; }
-      this.renderer.getSize(this.size);
-      this.composer.setSize(this.size.width, this.size.height);
-    }
-  },
+
   init: function () {
     this.size = new THREE.Vector2();
     this.scene = this.el.object3D;
     this.renderer = this.el.renderer;
     this.originalRender = this.el.renderer.render;
+    this._bound = false;
+
     if (this.data.enabled) {
-      this.bind();
+      this._setupComposer();
     }
   },
+
   update: function (oldData) {
-    if (oldData.enabled === false && this.data.enabled === true) {
-      this.bind();
+    const data = this.data;
+
+    // If enabled toggled
+    if (oldData.enabled !== data.enabled) {
+      if (data.enabled) {
+        this._setupComposer();
+      } else {
+        this._disableComposer();
+      }
+      return;
     }
 
-    if (oldData.enabled === true && this.data.enabled === false) {
-      this.el.renderer.render = this.originalRender;
+    // If any bloom params changed, rebuild composer
+    if (
+      data.enabled &&
+      (
+        oldData.threshold !== data.threshold ||
+        oldData.strength !== data.strength ||
+        oldData.radius !== data.radius
+      )
+    ) {
+      this._setupComposer();
     }
+  },
 
-    if (!this.data.enabled) { return; }
-
+  _setupComposer: function () {
     if (this.composer) {
       this.composer.dispose();
+      this.composer = null;
     }
-    // create composer with multisampling to avoid aliasing
-    var resolution = this.renderer.getDrawingBufferSize(new THREE.Vector2());
-    var renderTarget = new THREE.WebGLRenderTarget(
-      resolution.width,
-      resolution.height,
-      { type: THREE.HalfFloatType, samples: 8 }
-    );
 
-    this.composer = new EffectComposer(this.renderer, renderTarget);
+    const renderer = this.renderer;
+    const resolution = renderer.getDrawingBufferSize(new THREE.Vector2());
 
-    // create render pass
+    const renderTarget = new THREE.WebGLRenderTarget(resolution.width, resolution.height, {
+      type: THREE.HalfFloatType,
+      samples: 8,
+    });
+
+    this.composer = new EffectComposer(renderer, renderTarget);
+
     if (!this.renderPass) {
       this.renderPass = new RenderPass(this.scene, this.el.camera);
     }
     this.composer.addPass(this.renderPass);
 
-    // create bloom pass
-    var strength = this.data.strength;
-    var radius = this.data.radius;
-    var threshold = this.data.threshold;
-    if (this.bloomPass) { this.bloomPass.dispose(); }
+    if (this.bloomPass) {
+      this.bloomPass.dispose();
+    }
     this.bloomPass = new UnrealBloomPass(
       resolution,
-      strength,
-      radius,
-      threshold
+      this.data.strength,
+      this.data.radius,
+      this.data.threshold
     );
     this.composer.addPass(this.bloomPass);
 
-    // create output pass
-    if (this.outputPass) { this.outputPass.dispose(); }
+    if (this.outputPass) {
+      this.outputPass.dispose();
+    }
     this.outputPass = new OutputPass();
     this.composer.addPass(this.outputPass);
+
+    this._bindRenderer();
   },
 
-  bind: function () {
-    var self = this;
-    var isInsideComposerRender = false;
+  _bindRenderer: function () {
+    if (this._bound) return;
+    this._bound = true;
+
+    const self = this;
+    let insideRender = false;
 
     this.el.renderer.render = function () {
-      if (isInsideComposerRender) {
+      if (insideRender) {
         self.originalRender.apply(this, arguments);
       } else {
-        isInsideComposerRender = true;
-        // always set the current active camera on the RenderPass so that the
-        // inspector controls are working properly with post-processing enabled
+        insideRender = true;
         self.renderPass.camera = self.el.camera;
-        self.composer.render(self.el.sceneEl.delta / 1000);
-        isInsideComposerRender = false;
+        self.composer.render();
+        insideRender = false;
       }
     };
   },
 
-  remove: function () {
+  _disableComposer: function () {
     this.el.renderer.render = this.originalRender;
-    if (this.bloomPass) { this.bloomPass.dispose(); }
-    if (this.outputPass) { this.outputPass.dispose(); }
-    if (this.composer) { this.composer.dispose(); }
+    if (this.composer) {
+      this.composer.dispose();
+      this.composer = null;
+    }
+  },
+
+  events: {
+    rendererresize: function () {
+      if (!this.composer) return;
+      this.renderer.getSize(this.size);
+      this.composer.setSize(this.size.width, this.size.height);
+    }
+  },
+
+  remove: function () {
+    this._disableComposer();
+
+    if (this.bloomPass) {
+      this.bloomPass.dispose();
+      this.bloomPass = null;
+    }
+    if (this.outputPass) {
+      this.outputPass.dispose();
+      this.outputPass = null;
+    }
+    if (this.renderPass) {
+      this.renderPass = null;
+    }
   }
 });

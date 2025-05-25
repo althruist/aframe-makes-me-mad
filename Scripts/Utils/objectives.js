@@ -27,6 +27,7 @@ export async function setObjective(text, edit) {
             vrObjective.emit("hide");
             isDisabled = false;
         }, 2000);
+        return;
     }
     if (isDisabled) {
         console.warn("Objectives are disabled. You cannot set them... yet.");
