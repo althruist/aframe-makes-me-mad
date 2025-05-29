@@ -1,15 +1,24 @@
+import 'aframe-locomotion';
+import 'aframe-extras/controls';
+import 'aframe-extras/loaders';
+import 'aframe-gltf-model-plus';
+import 'aframe-haptics';
+import 'aframe-extras/primitives';
+import 'aframe-look-at-component';
+import 'aframe-randomizer-component';
+import 'aframe-particle-system-component';
+
 import { transition } from './Utils/transitionScreen.js';
-import { setSong, fade, playSound} from './Utils/sound.js';
+import { setAmbience, playSound } from './Utils/sound.js';
 import { objectiveVR } from './Utils/objectives.js';
 import { haptics } from './Utils/haptics.js';
+import { setTooltip, tooltipVisibility } from './Utils/tooltip.js';
 
 const cursor = document.getElementById('cursor');
 const camera = document.getElementById('camera');
-const startButton = document.getElementById('startButton');
-const startText = document.getElementById('startText');
-
-// Sound Players
-const footstepsPlayer = document.getElementById('footstepsPlayer');
+const startButton = document.getElementById('start-button');
+const startText = document.getElementById('start-text');
+const startScreen = document.getElementById('start-screen');
 
 // Gameplay Elements
 const scene = document.querySelector('a-scene');
@@ -28,96 +37,15 @@ const blockSound = '#block-sfx';
 
 //Runtime Stuff
 let clickDebounce = false;
-let isWalking = false;
-let canWalk = false;
+let hoveringOver = null;
 
-AFRAME.registerComponent('disabled', {
-    schema: { type: 'boolean', default: false }
-});
-
-AFRAME.registerComponent('walk', {
-    schema: { type: 'boolean', default: true },
-
-    update: function (oldData) {
-        if (oldData !== this.data) {
-            if (this.data) {
-                canWalk = true;
-                camera.setAttribute('wasd-controls', 'enabled', true);
-                leftHand.setAttribute('smooth-locomotion', 'target: #rig; reference: #camera');
-            } else {
-                canWalk = false;
-                camera.setAttribute('wasd-controls', 'enabled', false);
-                leftHand.removeAttribute('smooth-locomotion');
-            }
-        }
-    }
-});
-
-AFRAME.registerComponent('thumbstick-logging', {
-    init: function () {
-        this.el.addEventListener('thumbstickmoved', this.logThumbstick);
-    },
-    logThumbstick: function (evt) {
-        if (!canWalk) return;
-
-        const x = evt.detail.x;
-        const y = evt.detail.y;
-        const deadzone = 0.1;
-
-        if (Math.abs(x) > deadzone || Math.abs(y) > deadzone) {
-            if (!isWalking) {
-                footstepsPlayer.components.sound.playSound();
-                isWalking = true;
-            }
-        } else {
-            footstepsPlayer.components.sound.stopSound();
-            isWalking = false;
-        }
-    }
-});
-
-AFRAME.registerComponent('render-order', {
-    schema: { type: 'int', default: 0 },
-
-    init: function () {
-        this.el.addEventListener('object3dset', () => {
-            this.setRenderOrder();
-        });
-    },
-
-    update: function () {
-        this.setRenderOrder();
-    },
-
-    setRenderOrder: function () {
-        const object3D = this.el.object3D;
-        object3D.traverse((child) => {
-            if (child.renderOrder !== undefined) {
-                child.renderOrder = this.data;
-                child.material && (child.material.depthTest = false);
-            }
-        });
-    }
-});
-
-AFRAME.registerComponent('nav-offset-animator', {
-    schema: { type: 'vec3', default: { x: 0, y: 1.6, z: 0 } },
-    update() {
-      const nav = this.el.components['nav-mesh-constrained'];
-      if (nav) {
-        nav.data.offset = this.data;
-      }
-    }
-  });
-
-
-  leftHand.addEventListener('xbuttondown', () => {
+leftHand.addEventListener('xbuttondown', () => {
     objectiveVR(true);
-  });
+});
 
-  leftHand.addEventListener('xbuttonup', () => {
+leftHand.addEventListener('xbuttonup', () => {
     objectiveVR(false);
-  });
+});
 
 camera.setAttribute('walk', false);
 
@@ -137,9 +65,11 @@ scene.addEventListener('exit-vr', () => {
 
 interactables.forEach(object => {
     object.addEventListener('click', async (e) => {
+        leftHand.setAttribute('raycaster', 'lineColor', '#e5f5a9');
+        tooltipVisibility(false);
         if (object.getAttribute('disabled') || (e.detail && e.detail.cursorEl == rightHand && !cursor.getAttribute('raycaster').enabled)) {
             cursor.emit("block");
-            playSound(blockSound);
+            playSound(blockSound, "sfxPlayer");
             haptics(leftHand, "block");
             haptics(rightHand, "block");
             return;
@@ -147,11 +77,26 @@ interactables.forEach(object => {
             haptics(leftHand, "click");
             const logicId = object.getAttribute('data-logic');
             clickDebounce = true;
+            if (object.classList.contains('informative')) {
+                const infoLogic = await import('./Utils/info.js');
+                infoLogic.handle(object);
+            }
+
+            if (object.classList.contains("pickable")) {
+                object.setAttribute('disabled', true);
+                object.setAttribute('visible', false);;
+            }
+
+            if (object.getAttribute("init")) {
+                const initLogic = await import(`./Objectives/${object.getAttribute("init")}.js`);
+                initLogic.init();
+            }
 
             try {
                 const targetLogic = await import(`./Objects/${logicId}.js`);
                 if (targetLogic?.handle) {
-                    targetLogic.handle(object);
+                    targetLogic.handle(object, false);
+                    object.setAttribute("marker", "false");
                 } else {
                     console.warn(`No 'handle' function found in ${logicId}.js`);
                 }
@@ -159,7 +104,7 @@ interactables.forEach(object => {
                 console.error(`Failed to load logic for object '${logicId}':`, err);
             }
 
-            playSound(clickSound);
+            playSound(clickSound, "sfxPlayer");
             if (object.getAttribute('clickonce')) {
                 object.classList.toggle('interactable');
             }
@@ -172,7 +117,7 @@ interactables.forEach(object => {
 
     object.setAttribute('animation__hover', {
         property: 'material.emissiveIntensity',
-        to: 1,
+        to: 5,
         dur: 500,
         dir: 'alternate',
         loop: true,
@@ -194,12 +139,23 @@ interactables.forEach(object => {
 
     object.addEventListener('mouseenter', (e) => {
         if (object.getAttribute('disabled') || e.detail.cursorEl == rightHand) {
+            haptics(rightHand, "hover");
             e.detail.cursorEl.setAttribute('raycaster', 'lineColor', '#FF0000');
             return;
         } else {
             haptics(leftHand, "hover");
             object.emit('enter');
-            playSound(hoverSound);
+            playSound(hoverSound, "sfxPlayer");
+            hoveringOver = object;
+            if (object.classList.contains("animal")) {
+                setTooltip(scene.is('vr-mode') ? "Press 'Y' to Taunt / Left Trigger to Get Info" : "Press 'E' to Taunt / Click to Get Information", false);
+            } else if (object.classList.contains("pickable")) {
+                setTooltip(scene.is('vr-mode') ? "Press Left Trigger to Pick Up" : "Click to Pick Up", false);
+            } else if (object.classList.contains("informative") && !object.classList.contains("animal")) {
+                setTooltip(scene.is('vr-mode') ? "Press Left Trigger to Get Info" : "Click to Get Information", false);
+            } else {
+                setTooltip(scene.is('vr-mode') ? "Press Left Trigger to Interact" : "Click to Interact", false);
+            }
         };
     });
 
@@ -207,8 +163,11 @@ interactables.forEach(object => {
         if (clickDebounce) return;
         if (object.getAttribute('disabled') || e.detail.cursorEl == rightHand) {
             e.detail.cursorEl.setAttribute('raycaster', 'lineColor', '#e5f5a9');
+            leftHand.setAttribute('raycaster', 'lineColor', '#e5f5a9');
         } else {
             object.emit('leave');
+            hoveringOver = null;
+            tooltipVisibility(false);
         };
     });
 });
@@ -221,43 +180,40 @@ cursor.addEventListener('animationcomplete__block', function () {
     cursor.emit("whiten");
 });
 
-// Updated start button logic
 function onStartClick() {
     startButton.removeEventListener("click", onStartClick);
-    document.title = "EnvVR - Scene Selection";
-    setSong('#space-song');
-    setTimeout(() => transition(), 3000);
-    setTimeout(() => fade('in'), 3000);
+    document.title = "EnvVR - Space";
+    setAmbience('#space-ambience');
+    transition(true, 2000);
 }
 
 scene.addEventListener('loaded', () => {
     startText.innerHTML = "Click Anywhere to Start!";
     startButton.addEventListener('click', onStartClick);
+    startScreen.style.backgroundColor = "transparent";
 });
 
-const keysPressed = new Set();
-const movementKeys = new Set(['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
+startButton.addEventListener('click', () => {
+    document.getElementById('start-sfx').volume = '0.2';
+    document.getElementById('start-sfx').play();
+})
 
-document.addEventListener('keydown', (event) => {
-    if (!canWalk) return;
-    if (movementKeys.has(event.key)) {
-        keysPressed.add(event.key);
-        if (keysPressed.size > 0 && !isWalking) {
-            footstepsPlayer.components.sound.playSound();
-            isWalking = true;
-            camera.emit('walkAnim');
-        }
+startButton.addEventListener('mouseenter', () => {
+    document.getElementById('hover-sfx').play();
+})
+
+window.addEventListener('keydown', async (e) => {
+    if (hoveringOver && e.key === 'e' && hoveringOver.classList.contains("animal")) {
+        const logicId = hoveringOver.getAttribute('data-logic');
+        const targetLogic = await import(`./Objects/${logicId}.js`);
+        targetLogic.handle(hoveringOver, true);
     }
 });
 
-document.addEventListener('keyup', (event) => {
-    if (!canWalk) return;
-    if (movementKeys.has(event.key)) {
-        keysPressed.delete(event.key);
-        if (keysPressed.size === 0) {
-            footstepsPlayer.components.sound.stopSound();
-            isWalking = false;
-            camera.emit('stopAnim');
-        }
+leftHand.addEventListener('ybuttondown', async () => {
+    if (hoveringOver && hoveringOver.classList.contains("animal")) {
+        const logicId = hoveringOver.getAttribute('data-logic');
+        const targetLogic = await import(`./Objects/${logicId}.js`);
+        targetLogic.handle(hoveringOver, true);
     }
 });

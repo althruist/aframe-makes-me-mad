@@ -1,0 +1,29 @@
+1.0
+
+- portal expand on click
+- light moves slowly in the ocean
+- Completely updated the bird scene
+- added a manifest script for the components
+- disabled anti-aliasing and forced the canvas to be 1080 x 1920 for performance's sake
+- converted trees into mixins
+- fixed footsteps not playing in VR
+- if you play on desktop, it no longer goes into VR mode immediately anymore
+- modified the bloom a little
+- SIGNIFICANT performance gain
+- added a sign in the forest scene
+- added rain (2d image because particle component does not work with 1.7.1 and im limited on time.. please give me a break)
+- fixed some issues with the transition screen, also removed the delay at the start
+- made a bucket (it was hell.)
+- removed the 3D title
+- added a portal to the menu
+- removed some unnecessary things
+- added seed
+- added a fog controller so I can animate the fog
+- added a rainy sky
+- added clouds
+- made it so the tooltip to press o for objectives doesn't appear every time you teleport
+- a teleporter deletes itself once clicked, and the other is repositioned
+- renamed the page title to 'EnvVR - Space' for when you first enter the game
+- new rainy cutscene
+- added deer
+- updated the bird cutscene

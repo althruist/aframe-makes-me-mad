@@ -1,7 +1,8 @@
 let isShown = true;
 
-const videoTransition = document.getElementById("loadingVideo");
-const sfxPlayer = document.getElementById("sfxPlayer");
+const videoTransition = document.getElementById("loading-video");
+const sfxPlayer = document.getElementById("sfx-player");
+const video = document.getElementById("spinningtree-video");
 
 const scene = document.getElementById('scene');
 
@@ -16,14 +17,11 @@ function hide() {
     } else {
         cursor.setAttribute('raycaster', 'enabled', true)
     }
-    
-    sfxPlayer.setAttribute('sound', 'loop', false);
-    sfxPlayer.setAttribute('sound', 'volume', '1');
-    sfxPlayer.components.sound.stopSound();
 
     videoTransition.emit("hide2");
     setTimeout(() => videoTransition.emit("hide1"), 1000);
     isShown = false;
+    video.volume = 0;
 };
 
 function show() {
@@ -34,14 +32,10 @@ function show() {
         cursor.setAttribute('raycaster', 'enabled', false)
     }
 
-    sfxPlayer.setAttribute('sound', 'src', '#loading-sfx');
-    sfxPlayer.setAttribute('sound', 'volume', '0.1');
-    sfxPlayer.setAttribute('sound', 'loop', true);
-    sfxPlayer.components.sound.playSound();
-
     videoTransition.emit("show1");
     setTimeout(() => videoTransition.emit("show2"), 1000);
     isShown = true;
+    video.volume = 0.2;
 };
 
 export function transition(autoHide = true, time = 3) {

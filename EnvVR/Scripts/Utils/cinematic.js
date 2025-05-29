@@ -1,12 +1,12 @@
-const camera = document.getElementById("camera");
-const rig = document.getElementById("rig");
-
 let animationQueue = [];
 let isAnimating = false;
 
+const camera = document.getElementById("camera");
+const cinematicCamera = document.getElementById("cinematic-camera");
+
 function disableControls() {
-    camera.components['look-controls'].pause();
-    camera.components['nav-mesh-constrained'].pause();
+    camera.components['look-controls']?.pause();
+    camera.components['nav-mesh-constrained']?.pause();
     camera.setAttribute("walk", false);
 
     const rightHand = document.getElementById("right-hand");
@@ -16,8 +16,8 @@ function disableControls() {
 }
 
 function enableControls() {
-    camera.components['look-controls'].play();
-    camera.components['nav-mesh-constrained'].play();
+    camera.components['look-controls']?.play();
+    camera.components['nav-mesh-constrained']?.play();
     camera.setAttribute("walk", true);
 
     const rightHand = document.getElementById("right-hand");
@@ -26,22 +26,40 @@ function enableControls() {
     }
 }
 
-function stop(camPos) {
-    rig.setAttribute('position', camPos);
-    enableControls();
-    rig.removeAttribute('animation');
+function switchCamera(cam) {
+    if (cam == 'cinematic') {
+        camera.setAttribute("camera", "active", false);
+        cinematicCamera.setAttribute("camera", "active", true);
+        disableControls();
+    } else if (cam == 'game') {
+        cinematicCamera.setAttribute("camera", "active", false);
+        camera.setAttribute("camera", "active", true);
+        enableControls();
+    }
+}
+
+
+function stop(camPosition) {
+    cinematicCamera.setAttribute('rotation', "0 0 0");
+    cinematicCamera.setAttribute('position', camPosition);
+    switchCamera('game');
+    cinematicCamera.removeAttribute('animation');
     animationQueue = [];
     isAnimating = false;
 }
 
 export function viewport(action, options = {}) {
-    const { property, from, to, dur, easing, autoStop = false, camPos } = options;
+    const { property, from, to, dur, easing, autoStop = false, camPosition, camRotation } = options;
 
     if (action === "animate") {
-        animationQueue.push({ property, from, to, dur, easing, autoStop, camPos });
+        if (scene.is('vr-mode')) {
+            console.warn("Cinematics are disabled, you're in VR mode.");
+            return;
+        }
+        animationQueue.push({ property, from, to, dur, easing, autoStop, camPosition, camRotation });
         processQueue();
     } else if (action === "stop") {
-        stop(camPos);
+        stop(camPosition);
     }
 }
 
@@ -49,11 +67,15 @@ function processQueue() {
     if (isAnimating || animationQueue.length === 0) return;
 
     isAnimating = true;
-    const { property, from, to, dur, easing, autoStop, camPos } = animationQueue.shift();
+    const { property, from, to, dur, easing, autoStop, camPosition = null, camRotation = null } = animationQueue.shift();
 
-    disableControls();
-
-    rig.setAttribute('animation', {
+    switchCamera('cinematic');
+    if (camPosition) {
+        cinematicCamera.setAttribute('position', camPosition);
+    } else if (camRotation) {
+        cinematicCamera.setAttribute('rotation', camRotation);
+    }
+    cinematicCamera.setAttribute('animation', {
         property,
         from,
         to,
@@ -62,15 +84,15 @@ function processQueue() {
     });
 
     const onComplete = () => {
-        rig.removeEventListener('animationcomplete', onComplete);
+        cinematicCamera.removeEventListener('animationcomplete', onComplete);
         isAnimating = false;
 
         if (autoStop && animationQueue.length === 0) {
-            stop(camPos);
+            stop(camPosition);
         } else {
             processQueue();
         }
     };
 
-    rig.addEventListener('animationcomplete', onComplete);
+    cinematicCamera.addEventListener('animationcomplete', onComplete);
 }

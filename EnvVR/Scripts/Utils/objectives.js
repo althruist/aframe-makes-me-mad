@@ -12,9 +12,22 @@ const leftHand = document.getElementById('left-hand');
 let isDisabled = false;
 let debounce = false;
 
-export async function setObjective(text) {
-    if (objective.getAttribute('text', 'value').value !== "No Objectives Yet") {
+export async function setObjective(text, edit) {
+    if (objective.getAttribute('text', 'value').value !== "No Objectives Yet" && !edit) {
         await finishObjective();
+    }
+    if (edit) {
+        objective.emit("show");
+        vrObjective.emit("show");
+        objective.setAttribute('text', 'value', `Objective: ${text}`);
+        vrObjective.setAttribute('text', 'value', `Objective: ${text}`);
+        haptics(leftHand, "hover");
+        setTimeout(() => {
+            objective.emit("hide");
+            vrObjective.emit("hide");
+            isDisabled = false;
+        }, 2000);
+        return;
     }
     if (isDisabled) {
         console.warn("Objectives are disabled. You cannot set them... yet.");
@@ -26,7 +39,7 @@ export async function setObjective(text) {
     vrObjective.emit("show");
     objective.setAttribute('text', 'value', `Objective: ${text}`);
     vrObjective.setAttribute('text', 'value', `Objective: ${text}`);
-    playSound(newObjectiveSound);
+    playSound(newObjectiveSound, "objectivesPlayer");
     setTimeout(() => {
         objective.emit("hide");
         vrObjective.emit("hide");
@@ -40,11 +53,11 @@ document.addEventListener('keydown', (event) => {
             console.warn("Objectives are disabled. You cannot set them... yet.");
             return;
         }
-        if(debounce){
+        if (debounce) {
             return;
         }
         debounce = true;
-        playSound(newObjectiveSound);
+        playSound(newObjectiveSound, "objectivesPlayer");
         objective.emit("show");
     }
 });
@@ -74,7 +87,7 @@ export function finishObjective() {
         vrObjective.emit("show");
         objective.setAttribute('text', 'color', '#00FF00');
         vrObjective.setAttribute('text', 'color', '#00FF00');
-        playSound(objectiveClearedSound);
+        playSound(objectiveClearedSound, "objectivesPlayer");
 
         setTimeout(() => {
             objective.emit("hide");
@@ -101,6 +114,7 @@ export function objectiveVR(action) {
         if (action == true) {
             haptics(leftHand, "newObjective");
             vrObjective.emit("show");
+            playSound(newObjectiveSound, "objectivesPlayer");
         } else {
             vrObjective.emit("hide");
         }

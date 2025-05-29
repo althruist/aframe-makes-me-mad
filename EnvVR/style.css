@@ -1,14 +1,19 @@
-#startScreen {
+body {
+    margin: 0; 
+    overflow: hidden;
+}
+
+#start-screen {
     position: absolute;
     inset: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 99;
-    background-image: url(Images/Skies/MenuSky/MenuSky.jpg);
+    background: #030003;
 }
 
-#startButton {
+#start-button {
     background-color: transparent;
     color: white;
     border: 0px;
@@ -16,16 +21,19 @@
     height: 100%;
 }
 
-#startText {
+#start-text {
+    margin-top: 440px;
     font-size: 50px;
 }
 
-#startButton #startText {
+#start-button #start-text {
     transition: transform 0.2s ease;
     transform: scale(1);
+    opacity: 1;
 }
 
-#startButton:hover #startText {
+#start-button:hover #start-text {
     transition: transform 0.2s ease;
     transform: scale(0.9);
+    opacity: 0.8;
 }
