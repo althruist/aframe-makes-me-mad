@@ -5,6 +5,6 @@
 
 This game allows you to view a basic concept of 2 worlds (the forest and the ocean) adapting to climate change and how we can help!
 
-The whole project is based on [A-Frame](https://aframe.io) (with a touch of native Three.JS and other people's components), all the files are neatly organised for your direction
+The entire project is based on [A-Frame](https://aframe.io) (with a touch of native Three.JS and other components), and all the files are neatly organised for your convenience.
 
 **Head over to [my page](https://althruist.fyi) to play the game!!**
