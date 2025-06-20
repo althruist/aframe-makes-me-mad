@@ -1,8 +1,7 @@
 let isShown = true;
 
 const videoTransition = document.getElementById("loading-video");
-const sfxPlayer = document.getElementById("sfx-player");
-const video = document.getElementById("spinningtree-video");
+let video = document.getElementById(videoTransition.getAttribute('src').replace('#', ''));
 
 const scene = document.getElementById('scene');
 
@@ -11,6 +10,7 @@ const rightHand = document.getElementById('right-hand');
 const cursor = document.getElementById('cursor');
 
 function hide() {
+    video = document.getElementById(videoTransition.getAttribute('src').replace('#', ''));
     if (scene.is('vr-mode')) {
         rightHand.setAttribute('raycaster', 'enabled', true);
         leftHand.setAttribute('raycaster', 'enabled', true);
@@ -25,6 +25,7 @@ function hide() {
 };
 
 function show() {
+    video = document.getElementById(videoTransition.getAttribute('src').replace('#', ''));
     if (scene.is('vr-mode')) {
         rightHand.setAttribute('raycaster', 'enabled', false);
         leftHand.setAttribute('raycaster', 'enabled', false);

@@ -18,7 +18,7 @@ export function init() {
     seedData.forEach((data, index) => {
         const wrapper = document.createElement('a-entity');
         wrapper.setAttribute('id', data.id);
-        wrapper.setAttribute('class', 'seed');
+        wrapper.setAttribute('class', 'seed forest-scene');
         wrapper.setAttribute('position', data.position);
 
         const inner = document.createElement('a-entity');

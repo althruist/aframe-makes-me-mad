@@ -52,5 +52,7 @@ export function handle() {
 
     fish.addEventListener('animationcomplete__4', () => {
         setObjective("Check out the Fish", false);
-    })
+    });
+
+    fish.setAttribute('marker', true);
 }

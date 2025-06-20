@@ -1,9 +1,9 @@
 import { viewport } from "../Utils/cinematic.js";
-import { setObjective } from "../Utils/objectives.js";
+import { pauseObjectives, resumeObjectives, setObjective } from "../Utils/objectives.js";
 import { setMusic } from "../Utils/sound.js";
 
 export async function handle() {
-    let interval = 0;
+    pauseObjectives();
     setMusic('#forestgrowth-music', 0.7);
     document.getElementById('tree').setAttribute('animation-mixer', 'clip: Grow; loop: once;');
 
@@ -25,33 +25,37 @@ export async function handle() {
         .then(response => response.json())
         .then(treeData => {
             const scene = document.querySelector('a-scene');
+            const templateTree = document.getElementById('template-tree');
 
             treeData.forEach((tree, index) => {
-                interval += 250;
                 setTimeout(() => {
-                    const treeEl = document.createElement('a-entity');
+                    const treeEl = templateTree.cloneNode(true);
+
                     treeEl.setAttribute('id', `tree-${index + 1}`);
-                    treeEl.setAttribute('class', 'tree forest-scene');
+                    treeEl.setAttribute('class', 'tree');
+                    treeEl.setAttribute('visible', 'true');
                     treeEl.setAttribute('position', tree.position);
                     treeEl.setAttribute('scale', `${tree.scale} ${tree.scale} ${tree.scale}`);
-                    treeEl.setAttribute('mixin', 'tree-mixin');
-                    treeEl.setAttribute('animation-mixer', 'clip: Grow; loop: once;');
                     treeEl.setAttribute('random-rotation', 'min: 0 0 0; max: 0 360 0');
-                    scene.appendChild(treeEl);
-                    treeEl.setAttribute('sound', {
-                        src: `#treegrow${Math.floor(Math.random() * 8) + 1}-sfx`,
-                        autoplay: true
-                    });
+                    treeEl.setAttribute('animation-mixer', 'clip: Grow; loop: once;');
 
                     treeEl.addEventListener('animation-finished', () => {
-                        treeEl.setAttribute('animation-mixer', {
-                            clip: 'Idle',
-                            loop: 'repeat',
-                        });
+                        if (!tree.stopAnimatingOnGrowth) {
+                            treeEl.setAttribute('animation-mixer', {
+                                clip: 'Idle',
+                                loop: 'repeat',
+                            });
+                        } else {
+                            treeEl.removeAttribute('animation-mixer');
+                        }
                     });
-                }, interval)
+
+                    scene.appendChild(treeEl);
+
+                }, index * 250);
             });
         });
+
 
     await new Promise(resolve => setTimeout(resolve, 20000));
     bird.setAttribute('sound', {
@@ -62,7 +66,7 @@ export async function handle() {
     bird.setAttribute('animation__flyIn', {
         property: 'position',
         from: "-30.6742 10 34.17358",
-        to: '-16.674 5.517 34.174',
+        to: '-16.801 5.486 34.174',
         dur: 2000,
         easing: 'easeOutSine'
     })
@@ -86,5 +90,6 @@ export async function handle() {
     await new Promise(resolve => setTimeout(resolve, 3400));
     bird.setAttribute('marker', true);
 
+    resumeObjectives();
     setObjective("Check out the Bird", false);
 }

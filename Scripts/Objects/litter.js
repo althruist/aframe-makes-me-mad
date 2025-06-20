@@ -130,6 +130,7 @@ export async function handle(object) {
                                 clip: 'Idle',
                                 loop: 'repeat',
                             });
+                            coralEl.removeAttribute('animation-mixer');
                         });
                     }, interval)
                 });

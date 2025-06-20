@@ -41,7 +41,7 @@ async function place(x, y, z, bucket) {
             filled = true;
             setObjective("Let the Water Evaporate");
             holograph.setAttribute('disabled', true);
-            holograph.classList.remove('interactable');
+            holograph.setAttribute('position', '80 -10 55');
             holograph.setAttribute('visible', false);
             currentHolograph = null;
             bucket.setAttribute('position', `${x} 3 ${z}`);
@@ -51,13 +51,12 @@ async function place(x, y, z, bucket) {
             bucket.setAttribute('sound', 'src: #bucketplace-sfx; positional: false; autoplay: true;');
             await new Promise(resolve => setTimeout(resolve, 2300));
             bucket.setAttribute('visible', false);
+            bucket.setAttribute('position', '80 -10 55');
             place(66.686, 6.279, 50.163, bucket);
             holograph.remove();
         } else {
             saltified = true;
-            holograph.setAttribute('disabled', true);
-            holograph.classList.remove('interactable');
-            holograph.setAttribute('visible', false);
+            holograph.remove();
             bucket.setAttribute('position', `${x} 5.4 ${z}`);
             bucket.setAttribute('rotation', holograph.getAttribute('rotation'));
             bucket.components.sound.playSound();
@@ -106,13 +105,15 @@ export async function handle(bucket) {
         bucket.classList.remove("pickable");
         bucket.setAttribute('sound', 'src: #bucketpickup-sfx; autoplay: true;');
         setObjective("Fill the Bucket with Seawater", false);
+        bucket.setAttribute('position', '-71 0 23');
         handled = true;
         place(80.943, 6.182, 55.879, bucket);
     }
 
     if (filled) {
+        bucket.remove();
+        console.log("activated");
         const rainForest = await import('../Cutscene/rainForest.js');
         await rainForest.handle();
-        bucket.remove();
     }
 }

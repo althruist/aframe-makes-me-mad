@@ -25,15 +25,29 @@ export function setAmbience(src) {
 }
 
 export function stopAmbience() {
-    console.log("hi");
     ambiencePlayer.remove();
 }
 
-export function setMusic(src, volume) {
+export function setVolume(type, volume) {
+    if (type == "ambience") {
+        ambiencePlayer.setAttribute('sound', 'volume', volume);
+    } else if (type == "sfx") {
+        sfxPlayer.setAttribute('sound', 'volume', volume);
+    } else if (type == "music") {
+        musicPlayer.setAttribute('sound', 'volume', volume);
+    }
+}
+
+export function setMusic(src, volume, loop) {
     musicPlayer.components.sound.stopSound();
     musicPlayer.setAttribute('sound', 'src', src);
     musicPlayer.setAttribute('sound', 'volume', volume);
     musicPlayer.components.sound.playSound();
+    if (loop) {
+        musicPlayer.setAttribute('sound', 'loop', true);
+    } else {
+        musicPlayer.setAttribute('sound', 'loop', false);
+    }
 }
 
 export function fade(direction) {
@@ -45,3 +59,5 @@ export function fade(direction) {
         ambiencePlayer.emit("fadeout");
     }
 }
+
+window.setVolume = setVolume;

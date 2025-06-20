@@ -1,9 +1,8 @@
 import { viewport } from "../Utils/cinematic.js";
-import { setObjective } from "../Utils/objectives.js";
+import { pauseObjectives, resumeObjectives, setObjective } from "../Utils/objectives.js";
 import { setMusic } from "../Utils/sound.js";
 
 const fogController = document.getElementById('fogcontroller');
-const rain = document.getElementById('rain');
 const rainySky = document.getElementById('rainy-sky');
 const lightSun = document.getElementById('light-sun');
 const clouds = document.getElementById('clouds');
@@ -13,6 +12,17 @@ const deer = document.getElementById("deer");
 const deer2 = document.getElementById("deer2");
 
 export async function handle(object) {
+    const rain = document.createElement('a-entity');
+    rain.setAttribute('id', 'rain');
+    rain.setAttribute('scale', '2.72 2.06 1.61');
+    rain.setAttribute('position', '0 21.53451 -15');
+    rain.setAttribute('class', 'forest-scene')
+    rain.setAttribute('particle-system', "preset: snow; maxAge: 20; positionSpread: 100 100 100; rotationAngle: 3.14; accelerationValue: 0 100 0; accelerationSpread: 0.2 100 0.2; velocityValue: -94.64 40 0; velocitySpread: 0 2 2; dragRandomise: true; color: #FFFFFF; sizeSpread: 4; direction: 0; particleCount: 25000; texture: Images/Rain/Particle.webp; opacity: 0; opacitySpread: 0;");
+    rain.setAttribute('sound', 'src: #rain-sfx; volume: 0; loop: true; positional: true; autoplay: true;');
+    rain.setAttribute('animation__fadeout', 'property: sound.volume; to: 0; dur: 4000; easing: easeOutCubic; startEvents: fadeout');
+    rain.setAttribute('animation__fadein', 'property: sound.volume; to: 1; dur: 5000; easing: easeOutCubic; startEvents: fadein');
+    scene.appendChild(rain);
+    pauseObjectives();
     setMusic('#forestrain-music', 0.7)
     rain.setAttribute('sound', 'volume', 5);
     rain.components.sound.playSound();
@@ -46,9 +56,13 @@ export async function handle(object) {
     fogController.setAttribute('animation__1', 'property: fog-controller.color; to: #a4d0b5; dur: 4000; easing: easeOutSine');
     rain.setAttribute('particle-system', "opacity", "0");
     rain.emit("fadeout");
+    rain.addEventListener('animationcomplete', () => {
+        rain.remove();
+    })
     await new Promise(resolve => setTimeout(resolve, 8000));
     deer2.setAttribute('position', "3.817 4.6 -7.346");
     deer2.setAttribute('rotation', "-1.85 -90 1.240");
     deer2.setAttribute('marker', true);
     setObjective("Check out the Deer", false);
+    resumeObjectives();
 }

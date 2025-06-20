@@ -9,20 +9,26 @@ import 'aframe-randomizer-component';
 import 'aframe-particle-system-component';
 
 import { transition } from './Utils/transitionScreen.js';
-import { setAmbience, playSound } from './Utils/sound.js';
+import { setAmbience, playSound, stopAmbience } from './Utils/sound.js';
 import { objectiveVR } from './Utils/objectives.js';
 import { haptics } from './Utils/haptics.js';
 import { setTooltip, tooltipVisibility } from './Utils/tooltip.js';
+// import { say } from './Utils/say.js';
+import { setSubtitle } from './Utils/subtitles.js';
+import { say } from './Utils/voicelines.js';
 
 const cursor = document.getElementById('cursor');
 const camera = document.getElementById('camera');
 const startButton = document.getElementById('start-button');
 const startText = document.getElementById('start-text');
+const assetText = document.getElementById('asset-text');
 const startScreen = document.getElementById('start-screen');
+const assetEls = [];
 
 // Gameplay Elements
 const scene = document.querySelector('a-scene');
 const text = document.getElementById('subtitles');
+const objective = document.getElementById('objective');
 const vrObjective = document.getElementById('vrObjective');
 const interactables = document.querySelectorAll('.interactable');
 
@@ -38,6 +44,7 @@ const blockSound = '#block-sfx';
 //Runtime Stuff
 let clickDebounce = false;
 let hoveringOver = null;
+let cursorAnimating = false;
 
 leftHand.addEventListener('xbuttondown', () => {
     objectiveVR(true);
@@ -53,14 +60,16 @@ scene.addEventListener('enter-vr', () => {
     text.setAttribute('position', "0.06211 -0.4 -2");
     cursor.setAttribute('visible', 'false');
     cursor.setAttribute('raycaster', 'enabled: false');
-    vrObjective.setAttribute('visible', true)
+    objective.setAttribute('visible', false);
+    vrObjective.setAttribute('visible', true);
 });
 
 scene.addEventListener('exit-vr', () => {
     text.setAttribute('position', '0.06211 -1 -1.20656');
     cursor.setAttribute('visible', 'true');
     cursor.setAttribute('raycaster', 'enabled: true');
-    vrObjective.setAttribute('visible', false)
+    objective.setAttribute('visible', true);
+    vrObjective.setAttribute('visible', false);
 });
 
 interactables.forEach(object => {
@@ -117,7 +126,7 @@ interactables.forEach(object => {
 
     object.setAttribute('animation__hover', {
         property: 'material.emissiveIntensity',
-        to: 5,
+        to: 2,
         dur: 500,
         dir: 'alternate',
         loop: true,
@@ -173,11 +182,32 @@ interactables.forEach(object => {
 });
 
 cursor.addEventListener('animationcomplete__click', function () {
+    cursorAnimating = false;
+    cursor.emit("reset");
+});
+
+cursor.addEventListener('animationcomplete__leave', function () {
+    cursorAnimating = false;
     cursor.emit("reset");
 });
 
 cursor.addEventListener('animationcomplete__block', function () {
+    cursorAnimating = false;
     cursor.emit("whiten");
+});
+
+cursor.addEventListener('click', function () {
+    cursorAnimating = true;
+})
+
+cursor.addEventListener('mouseleave', function () {
+    if (cursorAnimating) {
+        cursor.addEventListener('animationcomplete__click', () => {
+            cursor.emit("leave")
+        })
+    } else {
+        cursor.emit("leave");
+    };
 });
 
 function onStartClick() {
@@ -189,8 +219,36 @@ function onStartClick() {
 
 scene.addEventListener('loaded', () => {
     startText.innerHTML = "Click Anywhere to Start!";
+    assetText.remove();
     startButton.addEventListener('click', onStartClick);
     startScreen.style.backgroundColor = "transparent";
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+    assetEls.push(...assets.children);
+    const totalAssets = assetEls.length;
+    let loadedCount = 0;
+
+    assetEls.forEach((el) => {
+        if (el.hasLoaded) {
+            loadedCount++;
+        } else {
+            ['loadeddata', 'load'].forEach(eventType => {
+                el.addEventListener(eventType, () => {
+                    loadedCount++;
+                    updateText(el.getAttribute('src') || el.id);
+                });
+            });
+        }
+    });
+    if (loadedCount === totalAssets) {
+        updateText('All assets preloaded');
+    }
+
+    function updateText(currentAsset) {
+        startText.textContent = `Assets Loaded ${loadedCount} of ${totalAssets}`;
+        assetText.textContent = currentAsset;
+    }
 });
 
 startButton.addEventListener('click', () => {

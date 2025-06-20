@@ -15,7 +15,7 @@ AFRAME.registerComponent('walk', {
             if (this.data) {
                 canWalk = true;
                 camera.setAttribute('wasd-controls', 'enabled', true);
-                leftHand.setAttribute('smooth-locomotion', 'target: #rig; reference: #camera');
+                leftHand.setAttribute('smooth-locomotion', "target: #rig; reference: #camera; moveSpeed: 10;");
             } else {
                 canWalk = false;
                 camera.setAttribute('wasd-controls', 'enabled', false);

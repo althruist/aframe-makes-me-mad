@@ -1,5 +1,5 @@
 body {
-    margin: 0; 
+    margin: 0;
     overflow: hidden;
 }
 
@@ -23,7 +23,14 @@ body {
 
 #start-text {
     margin-top: 440px;
+    margin-bottom: 0px;
     font-size: 50px;
+}
+
+#asset-text {
+    margin-top: 0px;
+    color: #ffffff56;
+    font-size: 20px;
 }
 
 #start-button #start-text {
@@ -36,4 +43,18 @@ body {
     transition: transform 0.2s ease;
     transform: scale(0.9);
     opacity: 0.8;
+}
+
+#credits {
+    float: left;
+    width: 240px;
+    height: auto;
+    position: fixed;
+    bottom: 0;
+    left: 24px;
+    opacity: 0.2;
+}
+
+.a-enter-vr-button {
+    display: none !important;
 }

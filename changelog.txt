@@ -1,29 +1,49 @@
-1.0
-
-- portal expand on click
-- light moves slowly in the ocean
-- Completely updated the bird scene
-- added a manifest script for the components
-- disabled anti-aliasing and forced the canvas to be 1080 x 1920 for performance's sake
-- converted trees into mixins
-- fixed footsteps not playing in VR
-- if you play on desktop, it no longer goes into VR mode immediately anymore
-- modified the bloom a little
-- SIGNIFICANT performance gain
-- added a sign in the forest scene
-- added rain (2d image because particle component does not work with 1.7.1 and im limited on time.. please give me a break)
-- fixed some issues with the transition screen, also removed the delay at the start
-- made a bucket (it was hell.)
-- removed the 3D title
-- added a portal to the menu
-- removed some unnecessary things
-- added seed
-- added a fog controller so I can animate the fog
-- added a rainy sky
-- added clouds
-- made it so the tooltip to press o for objectives doesn't appear every time you teleport
-- a teleporter deletes itself once clicked, and the other is repositioned
-- renamed the page title to 'EnvVR - Space' for when you first enter the game
-- new rainy cutscene
-- added deer
-- updated the bird cutscene
+- objectives are now based on a queue
+- objectives can be paused and resumed
+- ocean teleporter no longer initializes the seed goal
+- seeds also get deleted when teleported out of the forest
+- finally fixed that stupid issue where you were walking unbearably slow
+- the trees now spawn based on a template
+- removed tree growth emitting sound
+- fixed the cursor from overlapping event fires, messing with the animations
+- removed bloom, it was too expensive in terms of performance
+- added bloom image for the sun
+- re-enabled antialiasing, it was way too pixelated
+- reduced the ocean size dramatically
+- removed some trees and disabled animation on growth for others to try and prevent as much lag as I can
+- rain only spawns during the cutscene, and it gets deleted afterwards. it was extremely detrimental to FPS
+- marker position for turtle changed
+- bucket fixed, there were some weird issues happening
+- ensured bucket holograph is removed when interacted
+- desktop objective text is now invisible when on VR
+- objective text now fades out with opacity as well to make it look nicer
+- the loading screen now reports what it has loaded so far
+- transition screens now dynamically change the volume of the transitions, even if videos switch
+- added coral transition screen
+- added bird transition screen (new music!)
+- added a new mcast scene
+- other scenes get deleted when another scene is visited
+- optimized the forest nav-mesh
+- expanded the stairs in the forest nav-mesh so you don't just randomly fall
+- updated all controller color buttons
+- introduced a setVolume function to set volume for audio
+- added a new start screen
+- optimized the ocean
+- the ending scene is now actually "explorable" where it's not just a video playing
+- space teleport gets deleted on the last scene
+- when you go through the space door, the panel should be aligned properly on VR now
+- changed the emissive intensity when hovering over an object since I don't have bloom anymore
+- the bird no longer levitates off of the tree
+- made the option to make subtitles skippable
+- added the tooltip for skippable subtitles
+- gave borise the ability to follow you (credits to deputy director)
+- voicelines system should work in theory now. it is utilized by borise for the time being, but for future updates, i'll update the main game with it
+- added buttons
+- added tv
+- added panels of information about 6 bachelor subjects
+- added 6 new skies
+- added a new tooltip variant to say yes or no to a question (the right hand is finally useful)
+- updated the teleport icons into something more minimal for the sake of continuity
+- added new sound for tv coming in on course select
+- added my song voyage for tv coming in on course select
+- added new objective "explore"
